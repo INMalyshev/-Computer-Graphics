@@ -1,4 +1,5 @@
 from Dot import Dot
+import math
 
 class DotObject(Dot):
     def __init__(self, x, y, id):
@@ -8,5 +9,3 @@ class DotObject(Dot):
         return super(DotObject, self).__str__()
     def __eq__(self, other):
         return super(DotObject, self).__eq__(other)
-    def distance(self, other):
-        return super(DotObject, self).distance(other)

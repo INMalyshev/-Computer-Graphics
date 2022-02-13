@@ -1,4 +1,4 @@
-from math import sqrt
+import math
 
 class Dot:
     def __init__(self, x, y):
@@ -15,9 +15,3 @@ class Dot:
             return self.x == other.x and self.y == other.y
         # Иначе возвращаю NotImplemented
         return NotImplemented
-
-    def distance(self, other):
-        if isinstance(other, Dot):
-            return sqrt((self.x - other.x) * (self.x - other.x) + (self.y - other.y) * (self.y - other.y))
-        else:
-            return NotImplemented
