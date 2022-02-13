@@ -1,25 +1,32 @@
+from tkinter import *
+from DotObject import DotObject
+
 DOTS = list()
 DOTR = 2
 
-from tkinter import *
-
 def clickOnCanvas(event):
+    # Обработка нажатия на canvas
     global DOTS, DOTR, c
+    # Координаты нажатия мыши на canvas
     x = event.x
     y = event.y
-    new = 1
-    for elem in DOTS:
-        if elem[1] == x and elem[2] == y:
-            new = 0
-    if new:
-        id = c.create_oval(x-DOTR, y-DOTR, x+DOTR, y+DOTR, fill='red')
-        DOTS.append([id, x, y])
+    # Создаю объект класса DotObject
+    new = DotObject(x, y, None)
+    if new not in DOTS:
+        # Если эта точка новая то рисую ее и запоминаю
+        new.id = c.create_oval(x-DOTR, y-DOTR, x+DOTR, y+DOTR, fill='red')
+        DOTS.append(new)
 
 def undo(event):
     global DOTS, c
     if len(DOTS) > 0:
-        c.delete(DOTS[len(DOTS)-1][0])
-        del DOTS[len(DOTS)-1]
+        c.delete(DOTS[-1].id)
+        del DOTS[-1]
+
+def clearAll(event=None):
+    global DOTS, c
+    DOTS.clear()
+    c.delete("all")
 
 root = Tk()
 
@@ -51,5 +58,9 @@ toolFrame.place(x=toolFrameX, y=toolFrameY)
 undoButton = Button(toolFrame, text='undo')
 undoButton.bind('<Button-1>', undo)
 undoButton.grid(row=0, column=0)
+
+refreshButton = Button(toolFrame, text='refresh')
+refreshButton.bind('<Button-1>', clearAll)
+refreshButton.grid(row=0, column=10)
 
 root.mainloop()
