@@ -60,22 +60,3 @@ def solution(dots):
             maxCouple = couple
 
     return (maxCouple[0].center, maxCouple[0].r, maxCouple[1].center, maxCouple[1].r)
-
-
-# a = DotObject.DotObject(-1, 1, None)
-# b = DotObject.DotObject(-1, -1, None)
-# c = DotObject.DotObject(1, 1, None)
-# d = DotObject.DotObject(1, -1, None)
-# e = DotObject.DotObject(0, 0, None)
-# f = DotObject.DotObject(0, 2, None)
-# g = DotObject.DotObject(2, 2, None)
-# h = DotObject.DotObject(2, 0, None)
-# 
-#
-# dots = [a, b, c, d, e, f, g, h]
-#
-# res = solution(dots)
-# print(res[0])
-# print(res[1])
-# print(res[2])
-# print(res[3])

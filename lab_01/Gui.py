@@ -4,6 +4,7 @@ import Settings
 import CanvasObject
 import DotObject
 import UserForm
+import task
 
 class Gui(tkinter.Tk):
     def __init__(self):
@@ -33,6 +34,10 @@ class Gui(tkinter.Tk):
         self.addDotButton.bind("<Button-1>", self.addDot)
         self.addDotButton.grid(row=30, column=0)
 
+        self.findSolutionButton = tkinter.Button(self, text='find solution')
+        self.findSolutionButton.bind("<Button-1>", self.findSolution)
+        self.findSolutionButton.grid(row=40, column=0)
+
     def start(self):
         self.mainloop()
 
@@ -40,10 +45,10 @@ class Gui(tkinter.Tk):
         mainmenu = tkinter.Menu(self)
 
         filemenu = tkinter.Menu(mainmenu, tearoff=0)
-        filemenu.add_command(label="add new dot")
+        filemenu.add_command(label="add new dot", command=self.addDot)
         filemenu.add_command(label="undo", command=self.undo)
         filemenu.add_command(label="rewinnd", command=self.rewind)
-        filemenu.add_command(label="find solution")
+        filemenu.add_command(label="find solution", command=self.findSolution)
         filemenu.add_separator()
         filemenu.add_command(label="exit", command=quit)
 
@@ -97,6 +102,19 @@ class Gui(tkinter.Tk):
                 y = newDot.y
                 newDot.id = self.field.create_oval(x-r, y-r, x+r, y+r, fill=self.settings.dotcolor, tag=self.settings.useritemtag)
                 self.data.append(newDot)
+            else:
+                tkinter.messagebox.showwarning("already exists", "try to add sth else")
+
+    def findSolution(self, event=None):
+        solution = task.solution(self.data)
+        if solution is None:
+            tkinter.messagebox.showwarning("no solution found", "try to add more dots or change any")
+            return
+        print(solution[0])
+        print(solution[1])
+        print(solution[2])
+        print(solution[3])
+
 
 app = Gui()
 app.start()

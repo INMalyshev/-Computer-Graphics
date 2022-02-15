@@ -5,10 +5,10 @@ class Settings:
         self.title = "lab_01"
         self.autor = "Ilya Nikolaevich Malyshev IU7-34b"
         self.programinfo = "lab_01"
-        self.geometry = "360x720+200+20"
+        self.geometry = "600x720+200+20"
 
         self.canvasWidthReference = 0.97
-        self.canvasHeightReference = 0.5
+        self.canvasHeightReference = 0.75
 
         self.dotradius = 2
 
