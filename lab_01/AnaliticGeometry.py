@@ -79,3 +79,27 @@ def isFourPointsCircle(alpha, betta, gamma, delta):
             return False
         return True
     return NotImplemented
+
+def circleArea(radius):
+    return math.pi * radius * radius
+
+def circlesIntersectionArea(centerA, radiusA, centerB, radiusB):  # wrong solution
+    settings = Settings()
+    if isinstance(centerA, Dot) and isinstance(centerB, Dot):
+        dist = distance(centerA, centerB)
+        if radiusA + radiusB < dist or \
+        math.fabs(radiusA + radiusB - dist) < settings.eps:
+            return 0.0
+        if dist < math.fabs(radiusA - radiusB):
+            return 0.0
+        r1 = radiusA
+        r2 = radiusB
+        f1 = 2 * math.acos((r1*r1 - r2*r2 + dist*dist) / (2 * r1 * dist))
+        f2 = 2 * math.acos((r2*r2 - r1*r1 + dist*dist) / (2 * r2 * dist))
+        f1 %= math.pi
+        f1 %= math.pi
+        s1 = (r1*r1 * (f1 - math.sin(f1))) / 2
+        s2 = (r2*r2 * (f2 - math.sin(f2))) / 2
+        return s1 + s2;
+    else:
+        return NotImplemented
