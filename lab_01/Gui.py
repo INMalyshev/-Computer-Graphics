@@ -5,10 +5,15 @@ import CanvasObject
 import DotObject
 import UserForm
 import task
+import Record
 
 class Gui(tkinter.Tk):
     def __init__(self):
         self.settings = Settings.Settings()
+
+        self.log = list()
+        self.showSolution = False
+
         self.data = list()
 
         super(Gui, self).__init__()
@@ -71,6 +76,7 @@ class Gui(tkinter.Tk):
         tkinter.messagebox.showinfo("About the program", self.settings.programinfo)
 
     def rewind(self, event=None):
+        self.makeRecord() # Сохранение состояния для отката действий
         # Удалить все, кроме того, что было при запуске
         self.data.clear()
         self.field.rewind()
@@ -83,20 +89,41 @@ class Gui(tkinter.Tk):
         new = DotObject.DotObject(x, y, None)
         if new not in self.data:
             # Если эта точка новая то рисую ее и запоминаю
+            self.makeRecord() # Сохранение состояния для отката действий
+            self.showSolution = False
+            self.field.delete(self.settings.solutiontag)
             r = self.settings.dotradius
             new.id = self.field.create_oval(x-r, y-r, x+r, y+r, fill=self.settings.dotcolor, tag=self.settings.useritemtag)
             self.data.append(new)
 
     def undo(self, event=None):
-        if len(self.data) > 0:
-            self.field.delete(self.data[-1].id)
-            del self.data[-1]
+        print(f"in {len(self.log)}")
+        if len(self.log) == 0:
+            return
+        self.rewind()
+        position = self.log[len(self.log)-1]
+        self.data = position.data.copy()
+        self.showSolution = position.flag
+        for i in range(len(self.data)):
+            x, y, r = self.data[i].x, self.data[i].y, self.settings.dotradius
+            self.data[i].id = self.field.create_oval(x-r, y-r, x+r, y+r, fill=self.settings.dotcolor, tag=self.settings.useritemtag)
+        if self.showSolution:
+            solution = task.solution(self.data)
+            x1, y1, r1 = solution[0].x, solution[0].y, solution[1]
+            self.field.create_oval(x1-r1, y1-r1, x1+r1, y1+r1, width=2, outline="yellow", tag=self.settings.solutiontag)
+            x2, y2, r2 = solution[2].x, solution[2].y, solution[3]
+            self.field.create_oval(x2-r2, y2-r2, x2+r2, y2+r2, width=2, outline="green", tag=self.settings.solutiontag)
+        del self.log[len(self.log)-1]
+        print(f"out {len(self.log)}")
 
     def addDot(self, event):
         userForm = UserForm.UserForm(self)
         newDot = userForm.open()
         if newDot is not None:
             if newDot not in self.data:
+                self.makeRecord() # Сохранение состояния для отката действий
+                self.showSolution = False
+                self.field.delete(self.settings.solutiontag)
                 r = self.settings.dotradius
                 x = newDot.x
                 y = newDot.y
@@ -110,11 +137,23 @@ class Gui(tkinter.Tk):
         if solution is None:
             tkinter.messagebox.showwarning("no solution found", "try to add more dots or change any")
             return
-        print(solution[0])
-        print(solution[1])
-        print(solution[2])
-        print(solution[3])
+        self.makeRecord() # Сохранение состояния для отката действий
+        self.showSolution = True
+        x1, y1, r1 = solution[0].x, solution[0].y, solution[1]
+        self.field.create_oval(x1-r1, y1-r1, x1+r1, y1+r1, width=2, outline="yellow", tag=self.settings.solutiontag)
+        x2, y2, r2 = solution[2].x, solution[2].y, solution[3]
+        self.field.create_oval(x2-r2, y2-r2, x2+r2, y2+r2, width=2, outline="green", tag=self.settings.solutiontag)
 
+    def makeRecord(self):
+        print(len(self.log))
 
-app = Gui()
-app.start()
+        if self.settings.loglen is None:
+            self.log.append(Record.Record(self.data, self.showSolution))
+            return
+
+        if len(self.log) < self.settings.loglen:
+            self.log.append(Record.Record(self.data, self.showSolution))
+            return
+
+        self.log = self.log[1:]
+        self.log.append(Record.Record(self.data, self.showSolution))

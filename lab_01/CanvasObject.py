@@ -17,6 +17,7 @@ class CanvasObject(tkinter.Canvas):
 
     def rewind(self):
         self.delete(self.settings.useritemtag)
+        self.delete(self.settings.solutiontag)
 
     def zoom(self, event):
         if (event.delta > 0):

@@ -2,6 +2,8 @@ class Settings:
     def __init__(self):
         self.eps = 1e-6
 
+        self.loglen = None
+
         self.title = "lab_01"
         self.autor = "Ilya Nikolaevich Malyshev IU7-34b"
         self.programinfo = "lab_01"
@@ -17,3 +19,4 @@ class Settings:
         self.dotcolor = "darkred"
 
         self.useritemtag = "user"
+        self.solutiontag = "solution"
