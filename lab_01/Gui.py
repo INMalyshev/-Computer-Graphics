@@ -3,9 +3,12 @@ import tkinter.messagebox
 import Settings
 import CanvasObject
 import DotObject
+import Dot
 import UserForm
 import task
 import Record
+import AnaliticGeometry
+import ChangeDotForm
 
 class Gui(tkinter.Tk):
     def __init__(self):
@@ -25,6 +28,7 @@ class Gui(tkinter.Tk):
 
         self.field = CanvasObject.CanvasObject(self)
         self.field.bind("<Button-1>", self.clickOnCanvas)
+        self.field.bind("<Button-3>", self.changeDot, "+")
         self.field.grid(row=0, column=0, columnspan=100)
 
         self.undoButton = tkinter.Button(self, text='undo')
@@ -97,21 +101,25 @@ class Gui(tkinter.Tk):
             self.data.append(new)
 
     def undo(self, event=None):
-        print(f"in log len {len(self.log)}")
-        print(f"in data len {len(self.data)}")
-        # print(self.data)
-        # print(self.log[-1].data)
+        if self.settings.logOn:
+            print(f"in log len {len(self.log)}")
+            print(f"in data len {len(self.data)}")
+            # print(self.data)
+            # print(self.log[-1].data)
 
         if len(self.log) == 0:
-            print("empty log")
+            if self.settings.logOn:
+                print("empty log")
             return
 
         # self.rewind()
         self.data.clear()
         self.field.rewind()
-        
+
         position = self.log[len(self.log)-1]
-        print(f"position len {len(position.data)}")
+
+        if self.settings.logOn:
+            print(f"position len {len(position.data)}")
 
         # print(position)
 
@@ -130,8 +138,9 @@ class Gui(tkinter.Tk):
 
         del self.log[len(self.log)-1]
 
-        print(f"out log len {len(self.log)}")
-        print(f"out data len {len(self.data)}")
+        if self.settings.logOn:
+            print(f"out log len {len(self.log)}")
+            print(f"out data len {len(self.data)}")
 
     def addDot(self, event):
         userForm = UserForm.UserForm(self)
@@ -162,19 +171,56 @@ class Gui(tkinter.Tk):
         self.field.create_oval(x2-r2, y2-r2, x2+r2, y2+r2, width=2, outline="green", tag=self.settings.solutiontag)
 
     def makeRecord(self):
-        print(f"   in adding record log len {len(self.log)}")
+        if self.settings.logOn:
+            print(f"   in adding record log len {len(self.log)}")
 
         if self.settings.loglen is None:
             self.log.append(Record.Record(self.data, self.showSolution))
-            print(f"   out adding record log len {len(self.log)}")
+            if self.settings.logOn:
+                print(f"   out adding record log len {len(self.log)}")
             return
 
         if len(self.log) < self.settings.loglen:
             self.log.append(Record.Record(self.data, self.showSolution))
-            print(f"   out adding record log len {len(self.log)}")
+
+            if self.settings.logOn:
+                print(f"   out adding record log len {len(self.log)}")
+
             return
 
         self.log = self.log[1:]
         self.log.append(Record.Record(self.data, self.showSolution))
 
-        print(f"   out adding record log len {len(self.log)}")
+        if self.settings.logOn:
+            print(f"   out adding record log len {len(self.log)}")
+
+    def changeDot(self, event):
+        item = self.field.find_closest(event.x, event.y)
+        if len(item) == 0:
+            return
+
+        id = item[0]
+
+        if self.settings.useritemtag in self.field.gettags(id):
+            r = self.settings.dotradius
+            x, y = self.field.coords(id)[0] + r, self.field.coords(id)[1] + r
+            if AnaliticGeometry.distance(Dot.Dot(x, y), Dot.Dot(event.x, event.y)) <= self.settings.grabradius:
+                old = DotObject.DotObject(x, y, None)
+                form = ChangeDotForm.ChangeDotForm(self)
+                newDot = form.open()
+                if newDot is not None:
+                    if newDot not in self.data:
+                        self.makeRecord() # Сохранение состояния для отката действий
+                        self.showSolution = False
+                        self.field.delete(self.settings.solutiontag)
+                        r = self.settings.dotradius
+                        x = newDot.x
+                        y = newDot.y
+                        newDot.id = self.field.create_oval(x-r, y-r, x+r, y+r, fill=self.settings.dotcolor, tag=self.settings.useritemtag)
+                        self.data.append(newDot)
+                        self.data.remove(old)
+                        self.field.delete(id)
+                    else:
+                        tkinter.messagebox.showwarning("already exists", "try to add sth else")
+
+        # print(self.field.tag(id))
