@@ -97,24 +97,41 @@ class Gui(tkinter.Tk):
             self.data.append(new)
 
     def undo(self, event=None):
-        print(f"in {len(self.log)}")
+        print(f"in log len {len(self.log)}")
+        print(f"in data len {len(self.data)}")
+        # print(self.data)
+        # print(self.log[-1].data)
+
         if len(self.log) == 0:
+            print("empty log")
             return
-        self.rewind()
+
+        # self.rewind()
+        self.data.clear()
+        self.field.rewind()
+        
         position = self.log[len(self.log)-1]
-        self.data = position.data.copy()
+        print(f"position len {len(position.data)}")
+
+        # print(position)
+
+        # self.data = position.data.copy()
         self.showSolution = position.flag
-        for i in range(len(self.data)):
-            x, y, r = self.data[i].x, self.data[i].y, self.settings.dotradius
-            self.data[i].id = self.field.create_oval(x-r, y-r, x+r, y+r, fill=self.settings.dotcolor, tag=self.settings.useritemtag)
+
+        for i in range(len(position.data)):
+            x, y, r = position.data[i].x, position.data[i].y, self.settings.dotradius
+            self.data.append(DotObject.DotObject(x, y, self.field.create_oval(x-r, y-r, x+r, y+r, fill=self.settings.dotcolor, tag=self.settings.useritemtag)))
         if self.showSolution:
             solution = task.solution(self.data)
             x1, y1, r1 = solution[0].x, solution[0].y, solution[1]
             self.field.create_oval(x1-r1, y1-r1, x1+r1, y1+r1, width=2, outline="yellow", tag=self.settings.solutiontag)
             x2, y2, r2 = solution[2].x, solution[2].y, solution[3]
             self.field.create_oval(x2-r2, y2-r2, x2+r2, y2+r2, width=2, outline="green", tag=self.settings.solutiontag)
+
         del self.log[len(self.log)-1]
-        print(f"out {len(self.log)}")
+
+        print(f"out log len {len(self.log)}")
+        print(f"out data len {len(self.data)}")
 
     def addDot(self, event):
         userForm = UserForm.UserForm(self)
@@ -145,15 +162,19 @@ class Gui(tkinter.Tk):
         self.field.create_oval(x2-r2, y2-r2, x2+r2, y2+r2, width=2, outline="green", tag=self.settings.solutiontag)
 
     def makeRecord(self):
-        print(len(self.log))
+        print(f"   in adding record log len {len(self.log)}")
 
         if self.settings.loglen is None:
             self.log.append(Record.Record(self.data, self.showSolution))
+            print(f"   out adding record log len {len(self.log)}")
             return
 
         if len(self.log) < self.settings.loglen:
             self.log.append(Record.Record(self.data, self.showSolution))
+            print(f"   out adding record log len {len(self.log)}")
             return
 
         self.log = self.log[1:]
         self.log.append(Record.Record(self.data, self.showSolution))
+
+        print(f"   out adding record log len {len(self.log)}")
