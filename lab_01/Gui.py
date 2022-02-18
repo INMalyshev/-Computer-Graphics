@@ -31,13 +31,11 @@ class Gui(tkinter.Tk):
         self.field = CanvasObject.CanvasObject(self)
         self.field.bind("<Button-1>", self.clickOnCanvas)
         self.field.bind("<Button-3>", self.changeDot, "+")
-        # self.field.bind("<Double-Button-1>", self.delDot, "+")
         self.field.grid(row=0, column=0, columnspan=100)
 
         self.undoButton = tkinter.Button(self, text='undo')
         self.undoButton.bind("<Button-1>", self.undo)
         self.undoButton.grid(row=10, column=0)
-
         self.rewindButton = tkinter.Button(self, text='rewind')
         self.rewindButton.bind("<Button-1>", self.rewind)
         self.rewindButton.grid(row=10, column=10)

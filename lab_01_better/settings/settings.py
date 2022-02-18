@@ -1,4 +1,4 @@
-import math_settings
+from settings import math_settings
 
 class Settings:
     def __init__(self):
