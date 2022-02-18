@@ -9,6 +9,7 @@ import task
 import Record
 import AnaliticGeometry
 import ChangeDotForm
+import OutputText
 
 class Gui(tkinter.Tk):
     def __init__(self):
@@ -16,6 +17,7 @@ class Gui(tkinter.Tk):
 
         self.log = list()
         self.showSolution = False
+        self.delmode = False
 
         self.data = list()
 
@@ -29,6 +31,7 @@ class Gui(tkinter.Tk):
         self.field = CanvasObject.CanvasObject(self)
         self.field.bind("<Button-1>", self.clickOnCanvas)
         self.field.bind("<Button-3>", self.changeDot, "+")
+        # self.field.bind("<Double-Button-1>", self.delDot, "+")
         self.field.grid(row=0, column=0, columnspan=100)
 
         self.undoButton = tkinter.Button(self, text='undo')
@@ -37,15 +40,32 @@ class Gui(tkinter.Tk):
 
         self.rewindButton = tkinter.Button(self, text='rewind')
         self.rewindButton.bind("<Button-1>", self.rewind)
-        self.rewindButton.grid(row=20, column=0)
+        self.rewindButton.grid(row=10, column=10)
 
         self.addDotButton = tkinter.Button(self, text='add dot')
         self.addDotButton.bind("<Button-1>", self.addDot)
-        self.addDotButton.grid(row=30, column=0)
+        self.addDotButton.grid(row=10, column=20)
 
         self.findSolutionButton = tkinter.Button(self, text='find solution')
         self.findSolutionButton.bind("<Button-1>", self.findSolution)
-        self.findSolutionButton.grid(row=40, column=0)
+        self.findSolutionButton.grid(row=10, column=30)
+
+        self.findSolutionButton = tkinter.Button(self, text='del dot')
+        self.findSolutionButton.bind("<Button-1>", self.delmodeOnOff)
+        self.findSolutionButton.grid(row=10, column=40)
+
+        self.txt = OutputText.OutputText(self)
+        self.txt.grid(row=20, column=0)
+        self.txt.settext('hello')
+
+    def delmodeOnOff(self, event=None):
+        self.delmode = not self.delmode
+
+    def refreshText(self):
+        s = ''
+        for dot in self.data:
+            s += f"{dot}\n"
+        self.txt.settext(s)
 
     def start(self):
         self.mainloop()
@@ -84,21 +104,41 @@ class Gui(tkinter.Tk):
         # Удалить все, кроме того, что было при запуске
         self.data.clear()
         self.field.rewind()
+        self.refreshText()
 
     def clickOnCanvas(self, event):
-        # Обработка нажатия на canvas
-        x = event.x
-        y = event.y
-        # Создаю объект класса DotObject
-        new = DotObject.DotObject(x, y, None)
-        if new not in self.data:
-            # Если эта точка новая то рисую ее и запоминаю
-            self.makeRecord() # Сохранение состояния для отката действий
-            self.showSolution = False
-            self.field.delete(self.settings.solutiontag)
-            r = self.settings.dotradius
-            new.id = self.field.create_oval(x-r, y-r, x+r, y+r, fill=self.settings.dotcolor, tag=self.settings.useritemtag)
-            self.data.append(new)
+        if self.delmode == False:
+            # Обработка нажатия на canvas
+            x = event.x
+            y = event.y
+            # Создаю объект класса DotObject
+            new = DotObject.DotObject(x, y, None)
+            if new not in self.data:
+                # Если эта точка новая то рисую ее и запоминаю
+                self.makeRecord() # Сохранение состояния для отката действий
+                self.showSolution = False
+                self.field.delete(self.settings.solutiontag)
+                r = self.settings.dotradius
+                new.id = self.field.create_oval(x-r, y-r, x+r, y+r, fill=self.settings.dotcolor, tag=self.settings.useritemtag)
+                self.data.append(new)
+        else:
+            item = self.field.find_closest(event.x, event.y)
+            if len(item) == 0:
+                return
+
+            id = item[0]
+
+            if self.settings.useritemtag in self.field.gettags(id):
+                r = self.settings.dotradius
+                x, y = self.field.coords(id)[0] + r, self.field.coords(id)[1] + r
+                if AnaliticGeometry.distance(Dot.Dot(x, y), Dot.Dot(event.x, event.y)) <= self.settings.grabradius:
+                    old = DotObject.DotObject(x, y, None)
+                    self.makeRecord() # Сохранение состояния для отката действий
+                    self.data.remove(old)
+                    self.field.delete(id)
+                    self.showSolution = False
+                    self.field.delete(self.settings.solutiontag)
+        self.refreshText()
 
     def undo(self, event=None):
         if self.settings.logOn:
@@ -142,7 +182,14 @@ class Gui(tkinter.Tk):
             print(f"out log len {len(self.log)}")
             print(f"out data len {len(self.data)}")
 
-    def addDot(self, event):
+        self.refreshText()
+
+    def addDot(self, event=None):
+        self.field.delete("all")
+        for i in range(len(self.data)):
+            x, y, r = self.data[i].x, self.data[i].y, self.settings.dotradius
+            self.field.create_oval(x-r, y-r, x+r, y+r, fill=self.settings.dotcolor, tag=self.settings.useritemtag)
+
         userForm = UserForm.UserForm(self)
         newDot = userForm.open()
         if newDot is not None:
@@ -157,6 +204,7 @@ class Gui(tkinter.Tk):
                 self.data.append(newDot)
             else:
                 tkinter.messagebox.showwarning("already exists", "try to add sth else")
+        self.refreshText()
 
     def findSolution(self, event=None):
         solution = task.solution(self.data)
@@ -169,6 +217,11 @@ class Gui(tkinter.Tk):
         self.field.create_oval(x1-r1, y1-r1, x1+r1, y1+r1, width=2, outline="yellow", tag=self.settings.solutiontag)
         x2, y2, r2 = solution[2].x, solution[2].y, solution[3]
         self.field.create_oval(x2-r2, y2-r2, x2+r2, y2+r2, width=2, outline="green", tag=self.settings.solutiontag)
+
+        tkinter.messagebox.showinfo("solution", f"circle1 - {Dot.Dot(x1, y1)}, r1 - {r1:.1}\n\
+        circle1 - {Dot.Dot(x2, y2)}, r2 - {r2:.1}")
+
+        self.refreshText()
 
     def makeRecord(self):
         if self.settings.logOn:
@@ -222,5 +275,4 @@ class Gui(tkinter.Tk):
                         self.field.delete(id)
                     else:
                         tkinter.messagebox.showwarning("already exists", "try to add sth else")
-
-        # print(self.field.tag(id))
+        self.refreshText()
