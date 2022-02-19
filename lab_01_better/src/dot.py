@@ -1,11 +1,11 @@
 import math
 
-import settings
+from src.settings.settings import Settings
 
 class Dot:
     def __init__(self, x, y):
-        self.settings = settings.Settings()
-        
+        self.settings = Settings()
+
         self.x = x
         self.y = y
 
@@ -16,7 +16,8 @@ class Dot:
         # Сравнение двух точек
         if isinstance(other, Dot):
             # Если other имеет тип Dot
-            return math.fabs(self.x - other.x) < self.settings.math.eps \
-             and math.fabs(self.y - other.y) < self.settings.math.eps
+            eps = self.settings.math.eps
+            return math.fabs(self.x - other.x) < eps \
+             and math.fabs(self.y - other.y) < eps
         # Иначе возвращаю NotImplemented
         return NotImplemented
