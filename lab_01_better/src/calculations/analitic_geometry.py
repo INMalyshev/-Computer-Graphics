@@ -1,6 +1,6 @@
 import math
 
-from src.dot import Dot
+from src.vector import Vector
 from src.settings.settings import Settings
 
 def equal(alpha, betta):
@@ -9,12 +9,12 @@ def equal(alpha, betta):
     return math.fabs(alpha.x - betta.x) < eps and math.fabs(alpha.y - betta.y) < eps
 
 def distance(alpha, betta):
-    if isinstance(alpha, Dot) and isinstance(betta, Dot):
+    if isinstance(alpha, Vector) and isinstance(betta, Vector):
         return math.sqrt((alpha.x - betta.x) * (alpha.x - betta.x) + (alpha.y - betta.y) * (alpha.y - betta.y))
     return NotImplemented
 
 def angle(alpha, betta, gamma):
-    if isinstance(alpha, Dot) and isinstance(betta, Dot) and isinstance(gamma, Dot):
+    if isinstance(alpha, Vector) and isinstance(betta, Vector) and isinstance(gamma, Vector):
         ab = distance(alpha, betta)
         bg = distance(betta, gamma)
         scalar = (alpha.x - betta.x) * (gamma.x - betta.x) + (alpha.y - betta.y) * (gamma.y - betta.y)
@@ -23,7 +23,7 @@ def angle(alpha, betta, gamma):
     return NotImplemented
 
 def onOneExis(alpha, betta, gamma):
-    if isinstance(alpha, Dot) and isinstance(betta, Dot) and isinstance(gamma, Dot):
+    if isinstance(alpha, Vector) and isinstance(betta, Vector) and isinstance(gamma, Vector):
         settings = Settings()
         eps = settings.math.eps
         if math.fabs(angle(alpha, betta, gamma) - math.pi) < eps:
@@ -37,7 +37,7 @@ def onOneExis(alpha, betta, gamma):
     return NotImplemented
 
 def circumscribedCircleCenter(alpha, betta, gamma):
-    if isinstance(alpha, Dot) and isinstance(betta, Dot) and isinstance(gamma, Dot):
+    if isinstance(alpha, Vector) and isinstance(betta, Vector) and isinstance(gamma, Vector):
         if onOneExis(alpha, betta, gamma):
             return None
         x_12 = alpha.x - betta.x
@@ -54,12 +54,12 @@ def circumscribedCircleCenter(alpha, betta, gamma):
         z = x_12 * y_31 - y_12 * x_31
         a = -z_x / (2 * z)
         b = z_y / (2 * z)
-        result = Dot(a, b)
+        result = Vector(a, b)
         return result
     return NotImplemented
 
 def isFourPointsCircle(alpha, betta, gamma, delta):
-    if isinstance(alpha, Dot) and isinstance(betta, Dot) and isinstance(gamma, Dot) and isinstance(delta, Dot):
+    if isinstance(alpha, Vector) and isinstance(betta, Vector) and isinstance(gamma, Vector) and isinstance(delta, Vector):
         abc = circumscribedCircleCenter(alpha, betta, gamma)
         if abc is None:
             return False
@@ -87,7 +87,7 @@ def circleArea(radius):
 def circlesIntersectionArea(centerA, radiusA, centerB, radiusB):  # wrong solution
     settings = Settings()
     eps = settings.math.eps
-    if isinstance(centerA, Dot) and isinstance(centerB, Dot):
+    if isinstance(centerA, Vector) and isinstance(centerB, Vector):
         dist = distance(centerA, centerB)
         if radiusA + radiusB < dist or \
         math.fabs(radiusA + radiusB - dist) < eps:

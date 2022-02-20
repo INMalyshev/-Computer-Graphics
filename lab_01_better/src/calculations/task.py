@@ -1,17 +1,17 @@
 from src.calculations import analitic_geometry
-from src.dot import Dot
+from src.vector import Vector
 from src.settings.settings import Settings
 
 import itertools
 import math
 
 class Circle:
-    def __init__(self, pack, dots):
+    def __init__(self, pack, vectors):
         self.settings = Settings()
         self.pack = list(pack)
         self.center = analitic_geometry.circumscribedCircleCenter(self.pack[0], self.pack[1], self.pack[2])
         self.r = analitic_geometry.distance(self.center, self.pack[0])
-        self.count = self.countEntries(dots)
+        self.count = self.countEntries(vectors)
 
     def __str__(self):
         return f"-> {self.center} r={self.r} count={self.count} <-"
@@ -22,22 +22,22 @@ class Circle:
         else:
             return NotImplemented
 
-    def countEntries(self, dots):
+    def countEntries(self, vectors):
         count = 0
         eps = self.settings.eps
-        for dot in dots:
-            if self.r > analitic_geometry.distance(self.center, dot) or \
-            math.fabs(self.r - analitic_geometry.distance(self.center, dot)) < eps:
+        for vector in vectors:
+            if self.r > analitic_geometry.distance(self.center, vector) or \
+            math.fabs(self.r - analitic_geometry.distance(self.center, vector)) < eps:
                 count += 1
         return count
 
-def solution(dots):
-    packs = list(itertools.combinations(dots, 4))
+def solution(vectors):
+    packs = list(itertools.combinations(vectors, 4))
     circles = list()
     for pack in packs:
         tmp = list(pack)
         if analitic_geometry.isFourPointsCircle(tmp[0], tmp[1], tmp[2], tmp[3]):
-            circles.append(Circle(pack, dots))
+            circles.append(Circle(pack, vectors))
     circles.sort(reverse=True) # Получил упорядоченный список окружностей
     if len(circles) < 2:
         return None
