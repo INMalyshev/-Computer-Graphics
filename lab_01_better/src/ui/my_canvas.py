@@ -3,6 +3,7 @@ from tkinter import Canvas
 from src.settings.settings import Settings
 from src.field import Field
 from src.vector import Vector
+from src.position import Position
 
 class MyCanvas(Canvas):
     def __init__(self, parent):
@@ -55,6 +56,12 @@ class MyCanvas(Canvas):
 
         return Vector(zero_dot.x * kx, -zero_dot.y * ky)
 
+    def draw_line(self, a, b):
+        a_converted = self.vector2canvasCoordinates(a)
+        b_converted = self.vector2canvasCoordinates(b)
+
+        self.create_line(a_converted.x, a_converted.y, b_converted.x, b_converted.y)
+
     def draw_cross(self):
         if self.field.include(Vector(0.0, 0.0)):
 
@@ -64,11 +71,37 @@ class MyCanvas(Canvas):
             l2_start = Vector(0, self.field.start.y)
             l2_finish = Vector(0, self.field.finish.y)
 
-            l1s_converted = self.vector2canvasCoordinates(l1_start)
-            l1f_converted = self.vector2canvasCoordinates(l1_finish)
+            self.draw_line(l1_start, l1_finish)
+            self.draw_line(l2_start, l2_finish)
 
-            l2s_converted = self.vector2canvasCoordinates(l2_start)
-            l2f_converted = self.vector2canvasCoordinates(l2_finish)
+    def draw_dot(self, vector):
+        if not isinstance(vector, Vector):
+            return NotImplemented
 
-            self.create_line(l1s_converted.x, l1s_converted.y, l1f_converted.x, l1f_converted.y)
-            self.create_line(l2s_converted.x, l2s_converted.y, l2f_converted.x, l2f_converted.y)
+        if self.field.include(vector):
+            converted = self.vector2canvasCoordinates(vector)
+            self.create_oval(
+                converted.x - self.settings.ui.dot.radius,
+                converted.y - self.settings.ui.dot.radius,
+                converted.x + self.settings.ui.dot.radius,
+                converted.y + self.settings.ui.dot.radius,
+                fill=self.settings.ui.dot.fill_color,
+            )
+
+    def set_position(self, position):
+        self.delete("all")
+
+        self.draw_cross()
+
+        if position is None:
+            return
+
+        if not isinstance(position, Position):
+            return NotImplemented
+
+        for dot in position.dots:
+            if not isinstance(dot, Vector):
+                return NotImplemented
+
+            if self.field.include(dot):
+                self.draw_dot(dot)
