@@ -29,7 +29,7 @@ class MyCanvas(Canvas):
             new_dv = dv * k
             d = new_dv - dv
             new_v1 = v1 - (d * 0.5)
-            new_v1 = v2 + (d * 0.5)
+            new_v2 = v2 + (d * 0.5)
 
             self.field.start = new_v1
             self.field.finish = new_v2
@@ -55,6 +55,24 @@ class MyCanvas(Canvas):
         zero_dot = zero + vector
 
         return Vector(zero_dot.x * kx, -zero_dot.y * ky)
+
+    def canvasCoordinates2vector(self, vector):
+        if not isinstance(vector, Vector):
+            return NotImplemented
+
+        width = self.winfo_width()
+        height = self.winfo_height()
+
+        diagonal = self.field.finish - self.field.start
+
+        kx = width / diagonal.x
+        ky = height / diagonal.y
+        zero = Vector(-self.field.start.x, -self.field.finish.y)
+
+        pos_3 = Vector(vector.x / kx, -vector.y / ky)
+        pos_2 = pos_3 - zero
+
+        return pos_2
 
     def draw_line(self, a, b):
         a_converted = self.vector2canvasCoordinates(a)
