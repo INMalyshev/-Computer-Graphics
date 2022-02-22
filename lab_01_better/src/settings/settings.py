@@ -5,6 +5,8 @@ class Settings:
     def __init__(self):
         self.math = MathSettings()
         self.ui = UiSettings()
-        
+
         self.approach = 1.1
         self.estange = 0.9
+
+        self.move_len = 10

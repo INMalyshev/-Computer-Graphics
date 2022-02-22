@@ -13,11 +13,11 @@ class MyFrame(Frame):
         bg=self.settings.ui.frame.bg
         )
 
-        self.add_button = MyButton(self, "add", None)
+        self.add_button = MyButton(self, "add dot", None)
         self.add_button.grid(row=0, column=0)
 
         self.solution_button = MyButton(self, "find solution", None)
         self.solution_button.grid(row=0, column=1)
 
-        self.solution_button = MyButton(self, "rewind", None)
-        self.solution_button.grid(row=0, column=2)
+        self.rewind_button = MyButton(self, "rewind", None)
+        self.rewind_button.grid(row=0, column=2)

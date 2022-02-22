@@ -24,7 +24,7 @@ class Circle:
 
     def countEntries(self, vectors):
         count = 0
-        eps = self.settings.eps
+        eps = self.settings.math.eps
         for vector in vectors:
             if self.r > analitic_geometry.distance(self.center, vector) or \
             math.fabs(self.r - analitic_geometry.distance(self.center, vector)) < eps:
