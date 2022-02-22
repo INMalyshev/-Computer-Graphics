@@ -2,6 +2,7 @@ from tkinter import Frame
 
 from src.settings.settings import Settings
 from src.ui.my_button import MyButton
+from src.ui.my_text import MyText
 
 class MyFrame(Frame):
     def __init__(self, parent):
@@ -21,3 +22,6 @@ class MyFrame(Frame):
 
         self.rewind_button = MyButton(self, "rewind", None)
         self.rewind_button.grid(row=0, column=2)
+
+        self.text = MyText(self)
+        self.text.grid(row=0, column=3)

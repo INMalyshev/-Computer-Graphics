@@ -83,6 +83,10 @@ class App(tkinter.Tk):
 
     def _set_position(self, event): #TODO
         self.canvas.set_position(self.position)
+        s = ""
+        for vector in self.position.dots:
+            s += f"{vector}\n"
+        self.tool_frame.text.settext(s)
 
     def _handle_zoom(self, event):
         if (event.delta > 0):

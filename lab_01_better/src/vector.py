@@ -10,7 +10,7 @@ class Vector:
         self.y = y
 
     def __str__(self):
-        return f"({self.x}, {self.y})"
+        return f"({self.x:.3f}, {self.y:.3f})"
 
     def __eq__(self, other):
         # Сравнение двух точек
