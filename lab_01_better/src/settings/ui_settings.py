@@ -2,6 +2,7 @@ from src.settings.ui.button_settings import ButtonSettings
 from src.settings.ui.canvas_settings import CanvasSettings
 from src.settings.ui.dot_settings import DotSettings
 from src.settings.ui.menu_settings import MenuSettings
+from src.settings.ui.frame_settings import FrameSettings
 
 class UiSettings:
     def __init__(self):
@@ -9,3 +10,4 @@ class UiSettings:
         self.canvas = CanvasSettings()
         self.dot = DotSettings()
         self.menu = MenuSettings()
+        self.frame = FrameSettings()

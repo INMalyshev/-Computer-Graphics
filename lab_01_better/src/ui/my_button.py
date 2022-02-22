@@ -13,5 +13,5 @@ class MyButton(Button):
             height=self.settings.ui.button.height,
             bg=self.settings.ui.button.bg,
             font=self.settings.ui.button.font,
-            activebackground=self.settings.ui.button.activebackground 
+            activebackground=self.settings.ui.button.activebackground
         )

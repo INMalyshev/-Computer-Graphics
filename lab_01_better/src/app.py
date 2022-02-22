@@ -4,6 +4,7 @@ from src.position import Position
 from src.ui.my_canvas import MyCanvas
 from src.ui.my_button import MyButton
 from src.ui.my_menu import MyMenu
+from src.ui.my_frame import MyFrame
 from src.settings.settings import Settings
 from src.vector import Vector
 
@@ -19,16 +20,22 @@ class App(tkinter.Tk):
         self.bind("<Configure>", self._set_position)
         self.bind("<Control-z>", self._backward, "+")
         self.bind("<Shift-Control-Z>", self._forward, "+")
+        self.bind("<Control-w>", lambda event: self.quit(), "+")
 
-        self.config(menu=MyMenu(self))
+        self.menu = MyMenu(self)
+        self.menu.filemenu.add_command(label="add", command=None)
+        self.menu.filemenu.add_separator()
+        self.menu.filemenu.add_command(label="exit", command=self.quit)
+
+        self.config(menu=self.menu)
 
         self.canvas = MyCanvas(self)
         self.canvas.bind("<MouseWheel>", self._handle_zoom)
         self.canvas.bind("<Button-1>", self._handle_touch, "+")
         self.canvas.pack(fill="both", expand=True)
 
-        self.add_dot_button = MyButton(self, "add dot", None)
-        self.add_dot_button.pack()
+        self.tool_frame = MyFrame(self)
+        self.tool_frame.pack()
 
     def start(self):
         self.mainloop()
