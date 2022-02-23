@@ -114,6 +114,7 @@ class MyCanvas(Canvas):
                 converted.x + self.settings.ui.dot.radius,
                 converted.y + self.settings.ui.dot.radius,
                 fill=self.settings.ui.dot.fill_color,
+                tag=self.settings.ui.dot.tag,
             )
 
     def set_position(self, position):

@@ -7,9 +7,11 @@ from src.ui.my_button import MyButton
 from src.ui.my_menu import MyMenu
 from src.ui.my_frame import MyFrame
 from src.ui.add_dot_form import AddDotForm
+from src.ui.my_change_form import MyChangeForm
 from src.settings.settings import Settings
 from src.vector import Vector
 from src.calculations.task import solution
+from src.calculations.analitic_geometry import distance
 
 class App(tkinter.Tk):
     def __init__(self):
@@ -57,6 +59,7 @@ class App(tkinter.Tk):
         self.canvas = MyCanvas(self)
         self.canvas.bind("<MouseWheel>", self._handle_zoom)
         self.canvas.bind("<Button-1>", self._handle_touch, "+")
+        self.canvas.bind("<Button-3>", self._handle_right_touch, "+")
         self.canvas.pack(fill="both", expand=True)
 
         self.tool_frame = MyFrame(self)
@@ -108,6 +111,37 @@ class App(tkinter.Tk):
 
         print(f"after touch operation {len(self.position.dots)}")
 
+    def _handle_right_touch(self, event):
+        item = self.canvas.find_closest(event.x, event.y)
+        if len(item) == 0:
+            return
+
+        id = item[0]
+
+        if self.settings.ui.dot.tag in self.canvas.gettags(id):
+            r = self.settings.ui.dot.radius
+            x, y = self.canvas.coords(id)[0] + r, self.canvas.coords(id)[1] + r
+
+            if distance(Vector(x, y), Vector(event.x, event.y)) <= self.settings.grabradius:
+                converted_old = self.canvas.canvasCoordinates2vector(Vector(x, y))
+
+                #todo!!!
+                if converted_old in self.dots:
+                    window = MyChangeForm(self)
+                    answer = window.handle_open()
+
+                    if answer is not None:
+                        self._delete_dot(event, converted_old)
+                        if isinstance(answer, Vector):
+                            self._add_dot(answer)
+                        self._make_record()
+                        self._set_position(event)
+
+                # self.data.remove(old)
+                # self.field.delete(id)
+                # self.showSolution = False
+                # self.field.delete(self.settings.solutiontag)
+
     def _backward(self, event):
         self.position = self.position.backward()
         self.dots = self.position.dots.copy()
@@ -135,8 +169,6 @@ class App(tkinter.Tk):
         if dot in self.dots:
             self.dots.remove(dot)
             self.solution = False
-            self._make_record()
-            self._set_position(event)
 
     def _handle_add_dot_button(self, event):
         window = AddDotForm(self)

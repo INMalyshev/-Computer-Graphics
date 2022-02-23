@@ -10,3 +10,5 @@ class Settings:
         self.estange = 0.9
 
         self.move_len = 10
+
+        self.grabradius = 5
