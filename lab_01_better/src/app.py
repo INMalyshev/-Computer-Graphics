@@ -83,6 +83,7 @@ class App(tkinter.Tk):
 
     def _set_position(self, event): #TODO
         self.canvas.set_position(self.position)
+
         s = ""
         for vector in self.position.dots:
             s += f"{vector}\n"

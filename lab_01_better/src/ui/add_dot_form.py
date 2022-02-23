@@ -16,43 +16,49 @@ class AddDotForm(Toplevel):
         label = Label(self, text="add dot")
         entry_x = Entry(self, textvariable=self.x)
         entry_y = Entry(self, textvariable=self.y)
-        btn = Button(self, text="add", command=self.destroy)
+        self.btn = Button(self, text="add")
 
         label.grid(row=0, columnspan=2)
         Label(self, text="x").grid(row=1, column=0)
         Label(self, text="y").grid(row=2, column=0)
         entry_x.grid(row=1, column=1)
         entry_y.grid(row=2, column=1)
-        btn.grid(row=3, columnspan=2)
+        self.btn.grid(row=3, columnspan=2)
 
     def open(self):
         self.grab_set()
         self.wait_window()
+
+    def _handle_add(self, event, buffer):
         x = self.x.get()
         y = self.y.get()
 
-        return (x, y)
+        print(f"Buffer set ({x}, {y})")
+        buffer.append(x)
+        buffer.append(y)
+        self.destroy()
 
     def handle_open(self):
-        result = self.open()
-
-        if len(result[0]) == 0 or len(result[0]) == 0:
+        buffer = list()
+        self.btn.bind("<ButtonRelease-1>", lambda event: self._handle_add(event, buffer))
+        self.open()
+        print(buffer)
+        if len(buffer) != 2:
             return None
 
-        if result is not None:
-            try:
-                x = float(result[0])
-            except:
-                showerror("x error", "x is not a float number")
-                return None
-
-            try:
-                y = float(result[1])
-            except:
-                showerror("y error", "y is not a float number")
-                return None
-
-            return Vector(x, y)
-
-        else:
+        if len(buffer[0]) == 0 or len(buffer[1]) == 0:
             return None
+
+        try:
+            x = float(buffer[0])
+        except:
+            showerror("x error", "x is not a float number")
+            return None
+
+        try:
+            y = float(buffer[1])
+        except:
+            showerror("y error", "y is not a float number")
+            return None
+
+        return Vector(x, y)
