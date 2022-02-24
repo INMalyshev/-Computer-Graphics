@@ -1,4 +1,5 @@
 from tkinter import Canvas
+from math import fabs
 
 from src.settings.settings import Settings
 from src.field import Field
@@ -20,6 +21,8 @@ class MyCanvas(Canvas):
             Vector(self.settings.ui.canvas.field_start_x, self.settings.ui.canvas.field_start_y),\
             Vector(self.settings.ui.canvas.field_finish_x, self.settings.ui.canvas.field_finish_y)\
         )
+
+        self.bind("<Configure>", lambda event: self._correct_field())
 
     def zoom(self, k):
         if k > 0:
@@ -91,17 +94,6 @@ class MyCanvas(Canvas):
             l1_finish = Vector(self.field.finish.x, 0)
             self.draw_line(l1_start, l1_finish)
 
-        # if self.field.include(Vector(0.0, 0.0)):
-        #
-        #     l1_start = Vector(self.field.start.x, 0)
-        #     l1_finish = Vector(self.field.finish.x, 0)
-        #
-        #     l2_start = Vector(0, self.field.start.y)
-        #     l2_finish = Vector(0, self.field.finish.y)
-        #
-        #     self.draw_line(l1_start, l1_finish)
-        #     self.draw_line(l2_start, l2_finish)
-
     def draw_dot(self, vector):
         if not isinstance(vector, Vector):
             return NotImplemented
@@ -159,3 +151,16 @@ class MyCanvas(Canvas):
         converted.x + kx * radius,
         converted.y + ky * radius,
         )
+
+    def _correct_field(self):
+        width = self.winfo_width()
+        height = self.winfo_height()
+
+        fwidth = self.field.finish.x - self.field.start.x
+        fheight = self.field.finish.y - self.field.start.y
+
+        if fabs(fwidth * height - fheight * width) > self.settings.math.eps:
+            fxmid = 0.5 * (self.field.finish.x + self.field.start.x)
+            new_fwidth = fheight * width / height
+            self.field.start.x = fxmid - new_fwidth * 0.5
+            self.field.finish.x = fxmid + new_fwidth * 0.5
