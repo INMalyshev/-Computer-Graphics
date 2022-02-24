@@ -16,16 +16,17 @@ from src.calculations.analitic_geometry import distance
 class App(tkinter.Tk):
     def __init__(self):
         self.settings = Settings()
-        self.dots = [
-        Vector(100, 100),
-        Vector(100, 300),
-        Vector(300, 100),
-        Vector(300, 300),
-        Vector(200, 200),
-        Vector(200, 400),
-        Vector(400, 200),
-        Vector(400, 400),
-        ]
+        self.dots = list()
+        #     [
+        # Vector(100, 100),
+        # Vector(100, 300),
+        # Vector(300, 100),
+        # Vector(300, 300),
+        # Vector(200, 200),
+        # Vector(200, 400),
+        # Vector(400, 200),
+        # Vector(400, 400),
+        # ]
         self.solution = False
         self.circles = list()
         self.position = Position(None, None, self.dots.copy(), self.solution, self.circles.copy())
@@ -86,7 +87,7 @@ class App(tkinter.Tk):
     def _make_record(self):
         self.position = self.position.add(self.dots.copy(), self.solution, self.circles.copy())
 
-    def _set_position(self, event): #TODO
+    def _set_position(self, event):
         self.canvas.set_position(self.position)
 
         s = ""
