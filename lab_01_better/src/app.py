@@ -50,7 +50,9 @@ class App(tkinter.Tk):
         self.bind("<Down>", lambda event: self._handle_pull(Vector(0, -self.settings.move_len)), "+")
 
         self.menu = MyMenu(self)
-        self.menu.filemenu.add_command(label="add", command=None)
+        self.menu.filemenu.add_command(label="add", command=lambda: self._handle_add_dot_button(None))
+        self.menu.filemenu.add_command(label="find solution", command=lambda: self._solution(None))
+        self.menu.filemenu.add_command(label="rewind", command=lambda: self._rewind(None))
         self.menu.filemenu.add_separator()
         self.menu.filemenu.add_command(label="exit", command=self.quit)
 
