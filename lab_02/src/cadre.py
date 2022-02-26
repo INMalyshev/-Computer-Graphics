@@ -1,10 +1,12 @@
 class Cadre:
-    def __init__(self, parent, son):
+    def __init__(self, parent, son, couples):
         self.prev = parent
         self.next = son
 
-    def add(self):
-        self.next = Cadre(self, None)
+        self._couples = couples.copy()
+
+    def add(self, couples):
+        self.next = Cadre(self, None, couples)
 
         return self.next
 

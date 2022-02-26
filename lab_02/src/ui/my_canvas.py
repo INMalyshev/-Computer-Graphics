@@ -5,6 +5,8 @@ from src.settings.settings import Settings
 from src.field import Field
 from src.vector import Vector
 
+from src.cadre import Cadre
+
 class MyCanvas(Canvas):
     def __init__(self, parent):
         self.settings = Settings()
@@ -141,3 +143,15 @@ class MyCanvas(Canvas):
             new_fwidth = fheight * width / height
             self.field.start.x = fxmid - new_fwidth * 0.5
             self.field.finish.x = fxmid + new_fwidth * 0.5
+
+    def _set_position(self, position):
+        self.delete("all")
+        self.draw_cross()
+
+        if not isinstance(position, Cadre):
+            return NotImplemented
+
+        for couple in position._couples:
+            self.draw_line(couple[0], couple[1])
+
+
