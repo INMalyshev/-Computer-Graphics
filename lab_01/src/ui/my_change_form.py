@@ -35,13 +35,11 @@ class MyChangeForm(Toplevel):
         x = self.x.get()
         y = self.y.get()
 
-        print(f"Buffer set ({x}, {y})")
         buffer.append(x)
         buffer.append(y)
         self.destroy()
 
     def _handle_delete(self, event, buffer):
-        print(f"Buffer set (delete)")
         buffer.append("del")
         self.destroy()
 
@@ -50,7 +48,7 @@ class MyChangeForm(Toplevel):
         self.btn_change.bind("<ButtonRelease-1>", lambda event: self._handle_change(event, buffer))
         self.btn_delete.bind("<ButtonRelease-1>", lambda event: self._handle_delete(event, buffer))
         self.open()
-        print(buffer)
+
         if len(buffer) == 1 and buffer[0] == 'del':
             return 'del'
 
@@ -58,6 +56,7 @@ class MyChangeForm(Toplevel):
             return None
 
         if len(buffer[0]) == 0 or len(buffer[1]) == 0:
+            showerror("blanc input", "you entered a blanc string")
             return None
 
         try:

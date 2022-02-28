@@ -33,7 +33,6 @@ class AddDotForm(Toplevel):
         x = self.x.get()
         y = self.y.get()
 
-        print(f"Buffer set ({x}, {y})")
         buffer.append(x)
         buffer.append(y)
         self.destroy()
@@ -47,6 +46,7 @@ class AddDotForm(Toplevel):
             return None
 
         if len(buffer[0]) == 0 or len(buffer[1]) == 0:
+            showerror("blanc input", "you entered a blanc string")
             return None
 
         try:

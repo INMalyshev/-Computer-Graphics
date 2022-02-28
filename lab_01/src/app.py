@@ -17,16 +17,6 @@ class App(tkinter.Tk):
     def __init__(self):
         self.settings = Settings()
         self.dots = list()
-        #     [
-        # Vector(100, 100),
-        # Vector(100, 300),
-        # Vector(300, 100),
-        # Vector(300, 300),
-        # Vector(200, 200),
-        # Vector(200, 400),
-        # Vector(400, 200),
-        # Vector(400, 400),
-        # ]
         self.solution = False
         self.circles = list()
         self.position = Position(None, None, self.dots.copy(), self.solution, self.circles.copy())
@@ -112,8 +102,6 @@ class App(tkinter.Tk):
 
         self._set_position(event)
 
-        print(f"after touch operation {len(self.position.dots)}")
-
     def _handle_right_touch(self, event):
         item = self.canvas.find_closest(event.x, event.y)
         if len(item) == 0:
@@ -128,7 +116,6 @@ class App(tkinter.Tk):
             if distance(Vector(x, y), Vector(event.x, event.y)) <= self.settings.grabradius:
                 converted_old = self.canvas.canvasCoordinates2vector(Vector(x, y))
 
-                #todo!!!
                 if converted_old in self.dots:
                     window = MyChangeForm(self)
                     answer = window.handle_open()
@@ -140,11 +127,6 @@ class App(tkinter.Tk):
                         self._make_record()
                         self._set_position(event)
 
-                # self.data.remove(old)
-                # self.field.delete(id)
-                # self.showSolution = False
-                # self.field.delete(self.settings.solutiontag)
-
     def _backward(self, event):
         self.position = self.position.backward()
         self.dots = self.position.dots.copy()
@@ -152,18 +134,12 @@ class App(tkinter.Tk):
 
         self._set_position(event)
 
-        print(f"after backward operation solution is {self.position.solution}")
-        print(f"after backward operation {len(self.position.dots)}")
-
     def _forward(self, event):
         self.position = self.position.forward()
         self.dots = self.position.dots.copy()
         self.solution = self.solution
 
         self._set_position(event)
-
-        print(f"after forward operation solution is {self.position.solution}")
-        print(f"after forward operation {len(self.position.dots)}")
 
     def _delete_dot(self, event, dot):
         if not isinstance(dot, Vector):
@@ -194,10 +170,12 @@ class App(tkinter.Tk):
         if answer is not None:
             self.solution = True
             self.circles = list(answer)
+
+            self._make_record()
+            self._set_position(event)
         else:
             self.solution = False
-        self._make_record()
-        self._set_position(event)
+            showwarning("no solution found", "try adding more dots")
 
     def _rewind(self, event):
         self.dots = list()
