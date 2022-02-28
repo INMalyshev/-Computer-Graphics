@@ -20,9 +20,9 @@ def push(dot, vec):
 
     return dot + vec
 
-def scale(dot, k):
+def scale(dot, kx, ky):
     if not isinstance(dot, Vector):
         return NotImplemented
 
-    return dot * k
+    return Vector(dot.x * kx, dot.y * ky)
 

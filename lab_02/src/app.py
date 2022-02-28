@@ -6,15 +6,22 @@ from src.settings.settings import Settings
 from src.vector import Vector
 from src.cadre import Cadre
 from src.face import get_face
+from src.ui.scale_form import MyScaleForm
+from src.ui.push_form import MyPushForm
+from src.ui.rotate_form import MyRotateForm
 
 import src.calculations.rsp as rsp
+
+import copy
 
 
 class App(tkinter.Tk):
     def __init__(self):
         self.settings = Settings()
 
-        self.position = Cadre(None, None, get_face())
+        self.default = get_face()
+
+        self.position = Cadre(None, None, copy.deepcopy(self.default.copy()))
 
         super(App, self).__init__()
 
@@ -39,9 +46,18 @@ class App(tkinter.Tk):
 
         self.bind("<MouseWheel>", self._handle_zoom, "+")
 
+        # Настройки отката действия
+
+        self.bind("<Control-z>", lambda event: self._backward(None), "+")
+        self.bind("<Shift-Control-Z>", lambda event: self._forward(None), "+")
+
         # Подключение и настройка меню
 
         self.menu = MyMenu(self)
+        self.menu.filemenu.add_command(label="scale", command=self.___handle_scale_button)
+        self.menu.filemenu.add_command(label="push", command=self.___handle_push_button)
+        self.menu.filemenu.add_command(label="rotate", command=self.___handle_rotate_button)
+        self.menu.filemenu.add_command(label="rewind", command=self.__rewind)
         self.menu.filemenu.add_separator()
         self.menu.filemenu.add_command(label="exit", command=self.quit)
 
@@ -84,9 +100,31 @@ class App(tkinter.Tk):
         self.canvas.pull(vector)
         self._set_position()
 
+    def _make_record(self):
+        self.position = self.position.add(copy.deepcopy(self.position._couples))
+
+    def _backward(self, event):
+        self.position = self.position.backward()
+
+        self._set_position()
+
+    def _forward(self, event):
+        self.position = self.position.forward()
+
+        self._set_position()
+
     """ lab functions """
 
+    def __rewind(self):
+        self._make_record()
+
+        self.position._couples = copy.deepcopy(self.default.copy())
+
+        self._set_position()
+
     def __handle_rotate(self, event):
+        self._make_record()
+
         phi = self.settings.math.pi
         if event.delta > 0:
             phi *= self.settings.estange - 1
@@ -100,6 +138,8 @@ class App(tkinter.Tk):
         self._set_position()
 
     def __handle_scale(self, event):
+        self._make_record()
+
         k = 0
         if event.delta > 0:
             k = self.settings.estange
@@ -108,13 +148,51 @@ class App(tkinter.Tk):
 
         for i in range(len(self.position._couples)):
             for j in range(len(self.position._couples[i])):
-                self.position._couples[i][j] = rsp.scale(self.position._couples[i][j], k)
+                self.position._couples[i][j] = rsp.scale(self.position._couples[i][j], k, k)
 
         self._set_position()
 
     def __handle_push(self, vec):
+        self._make_record()
+
         for i in range(len(self.position._couples)):
             for j in range(len(self.position._couples[i])):
                 self.position._couples[i][j] = rsp.push(self.position._couples[i][j], vec)
 
         self._set_position()
+
+    def ___handle_scale_button(self):
+        window = MyScaleForm(self)
+        result = window.handle_open()
+        if result is not None:
+            self._make_record()
+
+            for i in range(len(self.position._couples)):
+                for j in range(len(self.position._couples[i])):
+                    self.position._couples[i][j] = rsp.scale(self.position._couples[i][j], result[0], result[1])
+
+            self._set_position()
+
+    def ___handle_push_button(self):
+        window = MyPushForm(self)
+        result = window.handle_open()
+        if result is not None:
+            self._make_record()
+
+            for i in range(len(self.position._couples)):
+                for j in range(len(self.position._couples[i])):
+                    self.position._couples[i][j] = rsp.push(self.position._couples[i][j], result)
+
+            self._set_position()
+
+    def ___handle_rotate_button(self):
+        window = MyRotateForm(self)
+        result = window.handle_open()
+        if result is not None:
+            self._make_record()
+
+            for i in range(len(self.position._couples)):
+                for j in range(len(self.position._couples[i])):
+                    self.position._couples[i][j] = rsp.rotate(self.position._couples[i][j], result[1], result[0])
+
+            self._set_position()

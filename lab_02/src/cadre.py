@@ -1,9 +1,11 @@
+import copy
+
 class Cadre:
     def __init__(self, parent, son, couples):
         self.prev = parent
         self.next = son
 
-        self._couples = couples.copy()
+        self._couples = copy.deepcopy(couples)
 
     def add(self, couples):
         self.next = Cadre(self, None, couples)
