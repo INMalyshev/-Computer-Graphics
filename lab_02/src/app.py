@@ -148,7 +148,7 @@ class App(tkinter.Tk):
 
         for i in range(len(self.position._couples)):
             for j in range(len(self.position._couples[i])):
-                self.position._couples[i][j] = rsp.scale(self.position._couples[i][j], k, k)
+                self.position._couples[i][j] = rsp.scale(self.position._couples[i][j], k, k, Vector(0, 0))
 
         self._set_position()
 
@@ -169,7 +169,7 @@ class App(tkinter.Tk):
 
             for i in range(len(self.position._couples)):
                 for j in range(len(self.position._couples[i])):
-                    self.position._couples[i][j] = rsp.scale(self.position._couples[i][j], result[0], result[1])
+                    self.position._couples[i][j] = rsp.scale(self.position._couples[i][j], result[0], result[1], result[2])
 
             self._set_position()
 

@@ -20,9 +20,13 @@ def push(dot, vec):
 
     return dot + vec
 
-def scale(dot, kx, ky):
-    if not isinstance(dot, Vector):
+def scale(dot, kx, ky, rel):
+    if not isinstance(dot, Vector) or not isinstance(dot, Vector):
         return NotImplemented
 
-    return Vector(dot.x * kx, dot.y * ky)
+    tmp = dot - rel
+    tmpp = Vector(tmp.x * kx, tmp.y * ky)
+    res = tmpp + rel
+
+    return res
 
