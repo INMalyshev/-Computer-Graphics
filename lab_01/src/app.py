@@ -75,7 +75,7 @@ class App(tkinter.Tk):
         return False
 
     def _make_record(self):
-        self.position = self.position.add(self.dots.copy(), self.solution, self.circles.copy())
+        self.position = self.position.add(self.dots.copy())
 
     def _set_position(self, event):
         self.canvas.set_position(self.position)
