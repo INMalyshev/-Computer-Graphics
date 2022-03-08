@@ -119,6 +119,7 @@ class MyAddLineForm(Toplevel):
 
         color = colorchooser.askcolor()
 
+
         if None in color:
             return None
 

@@ -8,6 +8,7 @@ from src.vector import Vector
 from src.cadre import Cadre
 
 from math import modf
+from colorsys import rgb_to_hsv, hsv_to_rgb
 
 
 class MyCanvas(Canvas):
@@ -117,7 +118,6 @@ class MyCanvas(Canvas):
                 self.draw_line(position._data[i]["start"], position._data[i]["finish"], position._data[i]["mod"], \
                                position._data[i]["color"], f"line_{i}")
 
-        print("not finished yet")
 
     # lab_03
 
@@ -125,7 +125,6 @@ class MyCanvas(Canvas):
         a_converted = self.vector2canvasCoordinates(a)
         b_converted = self.vector2canvasCoordinates(b)
 
-        print(color)
 
         if mod == 0:
             # default
@@ -152,7 +151,6 @@ class MyCanvas(Canvas):
             self.__wu_line(a_converted, b_converted, outline=color, tag=tag)
 
         else:
-            print("mod error")
             return NotImplemented
 
     def __dda_line(self, start, finish, outline="darkred", tag="None"):
@@ -285,6 +283,8 @@ class MyCanvas(Canvas):
 
     def __no_angle_bresenham_line(self, start, finish, outline="darkred", tag="None"):
         if isinstance(start, Vector) and isinstance(finish, Vector):
+            de = 0.3
+
             x0, x1 = start.x, finish.x
             y0, y1 = start.y, finish.y
             i = 2
@@ -303,7 +303,7 @@ class MyCanvas(Canvas):
                                  y - self.settings.pixel_radius,
                                  x + self.settings.pixel_radius,
                                  y + self.settings.pixel_radius,
-                                 outline=outline,
+                                 outline=self.___change_color(outline, modf(m / 2)[0]),
                                  tag=tag)
                 for x in range(int(x0), int(x1) + 1, dir_x):
                     if e < w:
@@ -317,17 +317,16 @@ class MyCanvas(Canvas):
                                      y - self.settings.pixel_radius,
                                      x + self.settings.pixel_radius,
                                      y + self.settings.pixel_radius,
-                                     outline=outline,
+                                     outline=self.___change_color(outline, modf(e)[0]),
                                      tag=tag)
             else:
-                print("second")
                 m = abs((i * delta_x) / delta_y)
                 w = i - m
                 self.create_oval(x - self.settings.pixel_radius,
                                  y - self.settings.pixel_radius,
                                  x + self.settings.pixel_radius,
                                  y + self.settings.pixel_radius,
-                                 outline=outline,
+                                 outline=self.___change_color(outline, modf(m / 2)[0]),
                                  tag=tag)
                 for y in range(int(y0), int(y1) + 1, dir_y):
                     if e < w:
@@ -341,7 +340,7 @@ class MyCanvas(Canvas):
                                      y - self.settings.pixel_radius,
                                      x + self.settings.pixel_radius,
                                      y + self.settings.pixel_radius,
-                                     outline=outline,
+                                     outline=self.___change_color(outline, modf(e)[0]),
                                      tag=tag)
 
         else:
@@ -366,7 +365,7 @@ class MyCanvas(Canvas):
                 x_end = round(x0)
                 y_end = y0 + gradient * (x_end - x0)
 
-                x_gapg = 1 - modf((x0 + 0.5))[0]
+                x_gap = 1 - modf((x0 + 0.5))[0]
                 x_pxl1 = x_end
 
                 y_pxl1 = modf(y_end)[1]
@@ -375,14 +374,14 @@ class MyCanvas(Canvas):
                                  y_pxl1 - self.settings.pixel_radius,
                                  x_pxl1 + self.settings.pixel_radius,
                                  y_pxl1 + self.settings.pixel_radius,
-                                 outline=outline,
+                                 outline=self.___change_color(outline, (1 - modf(y_end)[0]) * x_gap),
                                  tag=tag)
 
                 self.create_oval(x_pxl1 - self.settings.pixel_radius,
                                  y_pxl1 + 1 - self.settings.pixel_radius,
                                  x_pxl1 + self.settings.pixel_radius,
                                  y_pxl1 + 1 + self.settings.pixel_radius,
-                                 outline=outline,
+                                 outline=self.___change_color(outline, modf(y_end)[0] * x_gap),
                                  tag=tag)
 
                 inter_y = y_end + gradient # первое y - пересечение дл цикла
@@ -399,14 +398,14 @@ class MyCanvas(Canvas):
                                  y_pxl2 - self.settings.pixel_radius,
                                  x_pxl2 + self.settings.pixel_radius,
                                  y_pxl2 + self.settings.pixel_radius,
-                                 outline=outline,
+                                 outline=self.___change_color(outline, (1 - modf(y_end)[0]) * x_gap),
                                  tag=tag)
 
                 self.create_oval(x_pxl2 - self.settings.pixel_radius,
                                  y_pxl2 + 1 - self.settings.pixel_radius,
                                  x_pxl2 + self.settings.pixel_radius,
                                  y_pxl2 + 1 + self.settings.pixel_radius,
-                                 outline=outline,
+                                 outline=self.___change_color(outline, modf(y_end)[0] * x_gap),
                                  tag=tag)
 
                 # основной цикл
@@ -415,14 +414,14 @@ class MyCanvas(Canvas):
                                      modf(inter_y)[1] - self.settings.pixel_radius,
                                      x + self.settings.pixel_radius,
                                      modf(inter_y)[1] + self.settings.pixel_radius,
-                                     outline=outline,
+                                     outline=self.___change_color(outline, 1 - modf(inter_y)[0]),
                                      tag=tag)
 
                     self.create_oval(x - self.settings.pixel_radius,
                                      modf(inter_y)[1] + 1 - self.settings.pixel_radius,
                                      x + self.settings.pixel_radius,
                                      modf(inter_y)[1] + 1 + self.settings.pixel_radius,
-                                     outline=outline,
+                                     outline=self.___change_color(outline, modf(inter_y)[0]),
                                      tag=tag)
                     inter_y = inter_y + gradient
 
@@ -440,7 +439,7 @@ class MyCanvas(Canvas):
                 y_end = round(y0)
                 x_end = x0 + gradient * (y_end - y0)
 
-                y_gapg = 1 - modf((y0 + 0.5))[0]
+                y_gap = 1 - modf((y0 + 0.5))[0]
                 y_pxl1 = y_end
 
                 x_pxl1 = modf(x_end)[1]
@@ -449,14 +448,14 @@ class MyCanvas(Canvas):
                                  y_pxl1 - self.settings.pixel_radius,
                                  x_pxl1 + self.settings.pixel_radius,
                                  y_pxl1 + self.settings.pixel_radius,
-                                 outline=outline,
+                                 outline=self.___change_color(outline, (1 - modf(x_end)[0]) * y_gap),
                                  tag=tag)
 
                 self.create_oval(x_pxl1 + 1 - self.settings.pixel_radius,
                                  y_pxl1 - self.settings.pixel_radius,
                                  x_pxl1 + 1 + self.settings.pixel_radius,
                                  y_pxl1 + self.settings.pixel_radius,
-                                 outline=outline,
+                                 outline=self.___change_color(outline, modf(x_end)[0] * y_gap),
                                  tag=tag)
 
                 inter_x = x_end + gradient # первое y - пересечение дл цикла
@@ -473,14 +472,14 @@ class MyCanvas(Canvas):
                                  y_pxl2 - self.settings.pixel_radius,
                                  x_pxl2 + self.settings.pixel_radius,
                                  y_pxl2 + self.settings.pixel_radius,
-                                 outline=outline,
+                                 outline=self.___change_color(outline, (1 - modf(x_end)[0]) * y_gap),
                                  tag=tag)
 
                 self.create_oval(x_pxl2 + 1 - self.settings.pixel_radius,
                                  y_pxl2 - self.settings.pixel_radius,
                                  x_pxl2 + 1 + self.settings.pixel_radius,
                                  y_pxl2 + self.settings.pixel_radius,
-                                 outline=outline,
+                                 outline=self.___change_color(outline, modf(x_end)[0] * y_gap),
                                  tag=tag)
 
                 # основной цикл
@@ -489,16 +488,42 @@ class MyCanvas(Canvas):
                                      y - self.settings.pixel_radius,
                                      modf(inter_x)[1] + self.settings.pixel_radius,
                                      y + self.settings.pixel_radius,
-                                     outline=outline,
+                                     outline=self.___change_color(outline, 1 - modf(inter_x)[0]),
                                      tag=tag)
 
                     self.create_oval(modf(inter_x)[1] + 1 - self.settings.pixel_radius,
                                      y - self.settings.pixel_radius,
                                      modf(inter_x)[1] + 1 + self.settings.pixel_radius,
                                      y + self.settings.pixel_radius,
-                                     outline=outline,
+                                     outline=self.___change_color(outline, modf(inter_x)[0]),
                                      tag=tag)
                     inter_x = inter_x + gradient
 
         else:
             return NotImplemented
+
+    def ___change_color(self, rgb, k):
+        print(rgb, k)
+        _rgb = rgb.strip("#")
+        _r = _rgb[0:2]
+        _g = _rgb[2:4]
+        _b = _rgb[4:6]
+        r = int(_r, 16)
+        g = int(_g, 16)
+        b = int(_b, 16)
+
+        hsv = rgb_to_hsv(r, g, b)
+
+        new_rgb = hsv_to_rgb(hsv[0], hsv[1] * k, hsv[2])
+
+        rh = ('0' + str(hex(int(new_rgb[0]))[2:].upper()))[-2:]
+        gh = ('0' + str(hex(int(new_rgb[1]))[2:].upper()))[-2:]
+        bh = ('0' + str(hex(int(new_rgb[2]))[2:].upper()))[-2:]
+
+        result = f"#{rh}{gh}{bh}"
+
+        print("--->", result)
+        return result
+
+
+

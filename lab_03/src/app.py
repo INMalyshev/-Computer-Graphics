@@ -86,7 +86,6 @@ class App(tkinter.Tk):
     def _set_position(self):
         self.canvas._set_position(self.position)
         self.text_list.set_text(self.___gen_text())
-        # print(self.position._data)
 
     def _handle_zoom(self, event):
         if (event.delta > 0):
@@ -106,7 +105,6 @@ class App(tkinter.Tk):
 
 
     def _backward(self, event):
-        print("backward")
         self.position = self.position.backward()
 
         self._set_position()
@@ -129,7 +127,6 @@ class App(tkinter.Tk):
         new_window = MyAddLineForm(self)
         answer = new_window.handle_open()
 
-        # print(answer)
 
         if answer is not None:
             self._make_record()
