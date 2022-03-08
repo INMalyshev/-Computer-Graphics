@@ -3,11 +3,13 @@ from tkinter import colorchooser
 
 from src.ui.my_canvas import MyCanvas
 from src.ui.my_menu import MyMenu
+from src.ui.my_text import MyText
 from src.settings.settings import Settings
 from src.vector import Vector
 from src.cadre import Cadre
 from src.ui.my_button import MyButton
-from src.ui.add_line_form import MtAddLineForm
+from src.ui.add_line_form import MyAddLineForm
+from src.ui.del_with_id_form import MyDelWithIdForm
 
 import copy
 
@@ -66,6 +68,14 @@ class App(tkinter.Tk):
         self.add_line_button = MyButton(self, "add line", self.__handle_add_line_button)
         self.add_line_button.pack(fill="both")
 
+        self.add_line_button = MyButton(self, "del with id", self.__handle_del_with_id_button)
+        self.add_line_button.pack(fill="both")
+
+        # Text
+
+        self.text_list = MyText(self)
+        self.text_list.pack(fill="both")
+
         # Бинды чисто для лабы
 
 
@@ -75,6 +85,7 @@ class App(tkinter.Tk):
 
     def _set_position(self):
         self.canvas._set_position(self.position)
+        self.text_list.set_text(self.___gen_text())
         # print(self.position._data)
 
     def _handle_zoom(self, event):
@@ -115,7 +126,7 @@ class App(tkinter.Tk):
     """ lab functions """
 
     def __handle_add_line_button(self, event=None):
-        new_window = MtAddLineForm(self)
+        new_window = MyAddLineForm(self)
         answer = new_window.handle_open()
 
         # print(answer)
@@ -128,3 +139,20 @@ class App(tkinter.Tk):
     def __handle_choose_bg_color_button(self, event=None):
         color = colorchooser.askcolor()
         self.canvas.configure(bg=color[1])
+
+    def __handle_del_with_id_button(self, event=None):
+        new_window = MyDelWithIdForm(self)
+        id = new_window.handle_open()
+
+        if id >= 0 and id < len(self.position._data):
+            self._make_record()
+            del self.position._data[id]
+            self._set_position()
+
+    def ___gen_text(self):
+        text = ''
+        for i in range(len(self.position._data)):
+            if self.position._data[i]['type'] == 'line':
+                text += f"id: {i}, {self.position._data[i]['type']}, start: {self.position._data[i]['start']}, end: {self.position._data[i]['finish']}\n"
+
+        return text

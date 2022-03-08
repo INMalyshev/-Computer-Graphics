@@ -10,7 +10,7 @@ from tkinter.messagebox import showerror
 from src.settings.settings import Settings
 from src.vector import Vector
 
-class MtAddLineForm(Toplevel):
+class MyAddLineForm(Toplevel):
     def __init__(self, parent):
         self.settings = Settings()
 
