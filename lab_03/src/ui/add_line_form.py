@@ -5,6 +5,7 @@ from tkinter import Radiobutton
 from tkinter import Label
 from tkinter import Entry
 from tkinter import Button
+from tkinter import colorchooser
 from tkinter.messagebox import showerror
 from src.settings.settings import Settings
 from src.vector import Vector
@@ -116,10 +117,15 @@ class MtAddLineForm(Toplevel):
             showerror("finish y error", "finish y is not a float number")
             return None
 
+        color = colorchooser.askcolor()
+
+        if None in color:
+            return None
+
         return {
             "type": "line",
             "start": Vector(start_x, start_y),
             "finish": Vector(finish_x, finish_y),
             "mod": buffer[4],
-            "color": "red",
+            "color": color[1],
         }

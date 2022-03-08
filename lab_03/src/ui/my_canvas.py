@@ -7,6 +7,8 @@ from src.vector import Vector
 
 from src.cadre import Cadre
 
+from math import modf
+
 
 class MyCanvas(Canvas):
     def __init__(self, parent):
@@ -144,6 +146,10 @@ class MyCanvas(Canvas):
         elif mod == 4:
             # no angle bresenham
             self.__no_angle_bresenham_line(a_converted, b_converted, outline=color, tag=tag)
+
+        elif mod == 5:
+            # wu line
+            self.__wu_line(a_converted, b_converted, outline=color, tag=tag)
 
         else:
             print("mod error")
@@ -343,6 +349,156 @@ class MyCanvas(Canvas):
 
     def __wu_line(self, start, finish, outline="darkred", tag="None"):
         if isinstance(start, Vector) and isinstance(finish, Vector):
-            pass
+            x0, x1 = start.x, finish.x
+            y0, y1 = start.y, finish.y
+
+            if abs(x1 - x0) > abs(y1 - y0):
+                if x1 < x0:
+                    x0, x1 = x1, x0
+                    y0, y1 = y1, y0
+
+                delta_x = x1 - x0
+                delta_y = y1 - y0
+                gradient = delta_y / delta_x
+
+                # обработать начальную точку
+
+                x_end = round(x0)
+                y_end = y0 + gradient * (x_end - x0)
+
+                x_gapg = 1 - modf((x0 + 0.5))[0]
+                x_pxl1 = x_end
+
+                y_pxl1 = modf(y_end)[1]
+
+                self.create_oval(x_pxl1 - self.settings.pixel_radius,
+                                 y_pxl1 - self.settings.pixel_radius,
+                                 x_pxl1 + self.settings.pixel_radius,
+                                 y_pxl1 + self.settings.pixel_radius,
+                                 outline=outline,
+                                 tag=tag)
+
+                self.create_oval(x_pxl1 - self.settings.pixel_radius,
+                                 y_pxl1 + 1 - self.settings.pixel_radius,
+                                 x_pxl1 + self.settings.pixel_radius,
+                                 y_pxl1 + 1 + self.settings.pixel_radius,
+                                 outline=outline,
+                                 tag=tag)
+
+                inter_y = y_end + gradient # первое y - пересечение дл цикла
+
+                # обработать конечную точку
+
+                x_end = round(x1)
+                y_end = y1 + gradient * (x_end - x1)
+                x_gap = modf(x1 + 0.5)[0]
+                x_pxl2 = x_end
+                y_pxl2 = modf(y_end)[1]
+
+                self.create_oval(x_pxl2 - self.settings.pixel_radius,
+                                 y_pxl2 - self.settings.pixel_radius,
+                                 x_pxl2 + self.settings.pixel_radius,
+                                 y_pxl2 + self.settings.pixel_radius,
+                                 outline=outline,
+                                 tag=tag)
+
+                self.create_oval(x_pxl2 - self.settings.pixel_radius,
+                                 y_pxl2 + 1 - self.settings.pixel_radius,
+                                 x_pxl2 + self.settings.pixel_radius,
+                                 y_pxl2 + 1 + self.settings.pixel_radius,
+                                 outline=outline,
+                                 tag=tag)
+
+                # основной цикл
+                for x in range(x_pxl1, x_pxl2 + 1):
+                    self.create_oval(x - self.settings.pixel_radius,
+                                     modf(inter_y)[1] - self.settings.pixel_radius,
+                                     x + self.settings.pixel_radius,
+                                     modf(inter_y)[1] + self.settings.pixel_radius,
+                                     outline=outline,
+                                     tag=tag)
+
+                    self.create_oval(x - self.settings.pixel_radius,
+                                     modf(inter_y)[1] + 1 - self.settings.pixel_radius,
+                                     x + self.settings.pixel_radius,
+                                     modf(inter_y)[1] + 1 + self.settings.pixel_radius,
+                                     outline=outline,
+                                     tag=tag)
+                    inter_y = inter_y + gradient
+
+            else:
+                if y1 < y0:
+                    x0, x1 = x1, x0
+                    y0, y1 = y1, y0
+
+                delta_x = x1 - x0
+                delta_y = y1 - y0
+                gradient = delta_x / delta_y
+
+                # обработать начальную точку
+
+                y_end = round(y0)
+                x_end = x0 + gradient * (y_end - y0)
+
+                y_gapg = 1 - modf((y0 + 0.5))[0]
+                y_pxl1 = y_end
+
+                x_pxl1 = modf(x_end)[1]
+
+                self.create_oval(x_pxl1 - self.settings.pixel_radius,
+                                 y_pxl1 - self.settings.pixel_radius,
+                                 x_pxl1 + self.settings.pixel_radius,
+                                 y_pxl1 + self.settings.pixel_radius,
+                                 outline=outline,
+                                 tag=tag)
+
+                self.create_oval(x_pxl1 + 1 - self.settings.pixel_radius,
+                                 y_pxl1 - self.settings.pixel_radius,
+                                 x_pxl1 + 1 + self.settings.pixel_radius,
+                                 y_pxl1 + self.settings.pixel_radius,
+                                 outline=outline,
+                                 tag=tag)
+
+                inter_x = x_end + gradient # первое y - пересечение дл цикла
+
+                # обработать конечную точку
+
+                y_end = round(y1)
+                x_end = x1 + gradient * (y_end - y1)
+                y_gap = modf(y1 + 0.5)[0]
+                y_pxl2 = y_end
+                x_pxl2 = modf(x_end)[1]
+
+                self.create_oval(x_pxl2 - self.settings.pixel_radius,
+                                 y_pxl2 - self.settings.pixel_radius,
+                                 x_pxl2 + self.settings.pixel_radius,
+                                 y_pxl2 + self.settings.pixel_radius,
+                                 outline=outline,
+                                 tag=tag)
+
+                self.create_oval(x_pxl2 + 1 - self.settings.pixel_radius,
+                                 y_pxl2 - self.settings.pixel_radius,
+                                 x_pxl2 + 1 + self.settings.pixel_radius,
+                                 y_pxl2 + self.settings.pixel_radius,
+                                 outline=outline,
+                                 tag=tag)
+
+                # основной цикл
+                for y in range(y_pxl1, y_pxl2 + 1):
+                    self.create_oval(modf(inter_x)[1] - self.settings.pixel_radius,
+                                     y - self.settings.pixel_radius,
+                                     modf(inter_x)[1] + self.settings.pixel_radius,
+                                     y + self.settings.pixel_radius,
+                                     outline=outline,
+                                     tag=tag)
+
+                    self.create_oval(modf(inter_x)[1] + 1 - self.settings.pixel_radius,
+                                     y - self.settings.pixel_radius,
+                                     modf(inter_x)[1] + 1 + self.settings.pixel_radius,
+                                     y + self.settings.pixel_radius,
+                                     outline=outline,
+                                     tag=tag)
+                    inter_x = inter_x + gradient
+
         else:
             return NotImplemented

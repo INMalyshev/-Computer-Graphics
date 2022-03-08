@@ -1,4 +1,5 @@
 import tkinter
+from tkinter import colorchooser
 
 from src.ui.my_canvas import MyCanvas
 from src.ui.my_menu import MyMenu
@@ -48,6 +49,7 @@ class App(tkinter.Tk):
         # Подключение и настройка меню
 
         self.menu = MyMenu(self)
+        self.menu.filemenu.add_command(label="background color", command=self.__handle_choose_bg_color_button)
         self.menu.filemenu.add_command(label="rewind", command=self._rewind)
         self.menu.filemenu.add_separator()
         self.menu.filemenu.add_command(label="exit", command=self.quit)
@@ -122,3 +124,7 @@ class App(tkinter.Tk):
             self._make_record()
             self.position._data.append(answer)
             self._set_position()
+
+    def __handle_choose_bg_color_button(self, event=None):
+        color = colorchooser.askcolor()
+        self.canvas.configure(bg=color[1])
