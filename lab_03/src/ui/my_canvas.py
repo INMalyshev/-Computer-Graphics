@@ -137,6 +137,14 @@ class MyCanvas(Canvas):
             # bresenham
             self.__bresenham_line(a_converted, b_converted, outline=color, tag=tag)
 
+        elif mod == 3:
+            # int bresenham
+            self.__int_bresenham_line(a_converted, b_converted, outline=color, tag=tag)
+
+        elif mod == 4:
+            # no angle bresenham
+            self.__no_angle_bresenham_line(a_converted, b_converted, outline=color, tag=tag)
+
         else:
             print("mod error")
             return NotImplemented
@@ -216,5 +224,125 @@ class MyCanvas(Canvas):
                         x += dir_x
                         error = error - 1.0
 
+        else:
+            return NotImplemented
+
+    def __int_bresenham_line(self, start, finish, outline="darkred", tag="None"):
+        if isinstance(start, Vector) and isinstance(finish, Vector):
+            x0, x1 = start.x, finish.x
+            y0, y1 = start.y, finish.y
+
+            delta_x = abs(x1 - x0)
+            delta_y = abs(y1 - y0)
+
+            error = 0.0
+
+            dir_y = 1 if y1 - y0 > 0 else -1
+            dir_x = 1 if x1 - x0 > 0 else -1
+
+            if abs(x1 - x0) > abs(y1 - y0):
+                delta_err = (delta_y + 1)
+                y = y0
+
+                for x in range(int(x0), int(x1) + 1, dir_x):
+                    self.create_oval(x - self.settings.pixel_radius,
+                                     y - self.settings.pixel_radius,
+                                     x + self.settings.pixel_radius,
+                                     y + self.settings.pixel_radius,
+                                     outline=outline,
+                                     tag=tag)
+
+                    error = error + delta_err
+                    if error >= (delta_x + 1):
+                        y += dir_y
+                        error = error - (delta_x + 1)
+
+            else:
+                delta_err = (delta_x + 1)
+                x = x0
+
+                for y in range(int(y0), int(y1) + 1, dir_y):
+                    self.create_oval(x - self.settings.pixel_radius,
+                                     y - self.settings.pixel_radius,
+                                     x + self.settings.pixel_radius,
+                                     y + self.settings.pixel_radius,
+                                     outline=outline,
+                                     tag=tag)
+
+                    error = error + delta_err
+                    if error >= (delta_y + 1):
+                        x += dir_x
+                        error = error - (delta_y + 1)
+
+        else:
+            return NotImplemented
+
+    def __no_angle_bresenham_line(self, start, finish, outline="darkred", tag="None"):
+        if isinstance(start, Vector) and isinstance(finish, Vector):
+            x0, x1 = start.x, finish.x
+            y0, y1 = start.y, finish.y
+            i = 2
+            x = x0
+            y = y0
+            delta_x = x1 - x0
+            delta_y = y1 - y0
+            e = 1 / 2
+            dir_y = 1 if y1 - y0 > 0 else -1
+            dir_x = 1 if x1 - x0 > 0 else -1
+
+            if abs(x1 - x0) > abs(y1 - y0):
+                m = abs((i * delta_y) / delta_x)
+                w = i - m
+                self.create_oval(x - self.settings.pixel_radius,
+                                 y - self.settings.pixel_radius,
+                                 x + self.settings.pixel_radius,
+                                 y + self.settings.pixel_radius,
+                                 outline=outline,
+                                 tag=tag)
+                for x in range(int(x0), int(x1) + 1, dir_x):
+                    if e < w:
+                        x = x + dir_x
+                        e = e + m
+                    else:
+                        x = x + dir_x
+                        y = y + dir_y
+                        e = e - w
+                    self.create_oval(x - self.settings.pixel_radius,
+                                     y - self.settings.pixel_radius,
+                                     x + self.settings.pixel_radius,
+                                     y + self.settings.pixel_radius,
+                                     outline=outline,
+                                     tag=tag)
+            else:
+                print("second")
+                m = abs((i * delta_x) / delta_y)
+                w = i - m
+                self.create_oval(x - self.settings.pixel_radius,
+                                 y - self.settings.pixel_radius,
+                                 x + self.settings.pixel_radius,
+                                 y + self.settings.pixel_radius,
+                                 outline=outline,
+                                 tag=tag)
+                for y in range(int(y0), int(y1) + 1, dir_y):
+                    if e < w:
+                        y += dir_y
+                        e += m
+                    else:
+                        y += dir_y
+                        x += dir_x
+                        e -= w
+                    self.create_oval(x - self.settings.pixel_radius,
+                                     y - self.settings.pixel_radius,
+                                     x + self.settings.pixel_radius,
+                                     y + self.settings.pixel_radius,
+                                     outline=outline,
+                                     tag=tag)
+
+        else:
+            return NotImplemented
+
+    def __wu_line(self, start, finish, outline="darkred", tag="None"):
+        if isinstance(start, Vector) and isinstance(finish, Vector):
+            pass
         else:
             return NotImplemented

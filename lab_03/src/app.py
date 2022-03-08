@@ -73,7 +73,7 @@ class App(tkinter.Tk):
 
     def _set_position(self):
         self.canvas._set_position(self.position)
-        print(self.position._data)
+        # print(self.position._data)
 
     def _handle_zoom(self, event):
         if (event.delta > 0):
