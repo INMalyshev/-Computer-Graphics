@@ -7,8 +7,9 @@ from src.vector import Vector
 
 from src.cadre import Cadre
 
-from math import modf
-from colorsys import rgb_to_hsv, hsv_to_rgb
+from src.calculations.lines import *
+from math import degrees, radians, pi
+from src.calculations.rsp import rotate
 
 
 class MyCanvas(Canvas):
@@ -117,413 +118,67 @@ class MyCanvas(Canvas):
             if position._data[i]["type"] == "line":
                 self.draw_line(position._data[i]["start"], position._data[i]["finish"], position._data[i]["mod"], \
                                position._data[i]["color"], f"line_{i}")
+            elif position._data[i]["type"] == "bunch":
+                self.draw_bunch(position._data[i]["center"], position._data[i]["line_len"], position._data[i]["angle_step"], \
+                                position._data[i]["mod"], position._data[i]["color"], f"line_{i}")
 
 
     # lab_03
 
-    def draw_line(self, a, b, mod, color, tag):  # todo
+    def pri_pix(self, x, y, color, tag):
+        self.create_oval(x - self.settings.pixel_radius,
+                         y - self.settings.pixel_radius,
+                         x + self.settings.pixel_radius,
+                         y + self.settings.pixel_radius,
+                         outline=color,
+                         tag=tag)
+
+    def draw_line(self, a, b, mod, color, tag):
+        # Возвращает количество ступенек или None, если defaul или исключение
+
         a_converted = self.vector2canvasCoordinates(a)
         b_converted = self.vector2canvasCoordinates(b)
 
+        if a_converted == b_converted:
+            self.pri_pix(a_converted.x, a_converted.y, color, tag)
+            return None
+
+        functions = [
+            dda_line,
+            bresenham_line,
+            int_bresenham_line,
+            no_angle_bresenham_line,
+            wu_line,
+        ]
+
+        answer = None
 
         if mod == 0:
             # default
             self.create_line(a_converted.x, a_converted.y, b_converted.x, b_converted.y, fill=color, tag=tag)
 
-        elif mod == 1:
-            # dda mode
-            self.__dda_line(a_converted, b_converted, outline=color, tag=tag)
+            return answer
 
-        elif mod == 2:
-            # bresenham
-            self.__bresenham_line(a_converted, b_converted, outline=color, tag=tag)
+        elif mod in range(1, 6):
+            data = functions[mod-1](a_converted, b_converted, color, tag)
 
-        elif mod == 3:
-            # int bresenham
-            self.__int_bresenham_line(a_converted, b_converted, outline=color, tag=tag)
+            answer = calculate_steps(data)
 
-        elif mod == 4:
-            # no angle bresenham
-            self.__no_angle_bresenham_line(a_converted, b_converted, outline=color, tag=tag)
+            if data is not None:
+                for i in range(0, len(data), 4):
+                    for j in range(len(data[0])):
+                        self.pri_pix(data[i][j], data[i+1][j], data[i+2][j], data[i+3][j])
 
-        elif mod == 5:
-            # wu line
-            self.__wu_line(a_converted, b_converted, outline=color, tag=tag)
+            return answer
 
         else:
-            return NotImplemented
-
-    def __dda_line(self, start, finish, outline="darkred", tag="None"):
-        if isinstance(start, Vector) and isinstance(finish, Vector):
-            x = start.x
-            y = start.y
-
-            self.create_oval(x - self.settings.pixel_radius,
-                             y - self.settings.pixel_radius,
-                             x + self.settings.pixel_radius,
-                             y + self.settings.pixel_radius,
-                             outline=outline,
-                             tag=tag)
-
-            l = max(abs(finish.x - start.x), abs(finish.y - start.y)) + 1
-
-            for i in range(int(l)):
-                x += (finish.x - start.x) / l
-                y += (finish.y - start.y) / l
-
-                self.create_oval(x - self.settings.pixel_radius,
-                                 y - self.settings.pixel_radius,
-                                 x + self.settings.pixel_radius,
-                                 y + self.settings.pixel_radius,
-                                 outline=outline,
-                                 tag=tag)
-
-        else:
-            return NotImplemented
-
-    def __bresenham_line(self, start, finish, outline="darkred", tag="None"):
-        if isinstance(start, Vector) and isinstance(finish, Vector):
-            x0, x1 = start.x, finish.x
-            y0, y1 = start.y, finish.y
-
-            delta_x = abs(x1 - x0)
-            delta_y = abs(y1 - y0)
-
-            error = 0.0
-
-            dir_y = 1 if y1 - y0 > 0 else -1
-            dir_x = 1 if x1 - x0 > 0 else -1
-
-            if abs(x1 - x0) > abs(y1 - y0):
-                delta_err = (delta_y + 1) / (delta_x + 1)
-                y = y0
-
-                for x in range(int(x0), int(x1) + 1, dir_x):
-                    self.create_oval(x - self.settings.pixel_radius,
-                                     y - self.settings.pixel_radius,
-                                     x + self.settings.pixel_radius,
-                                     y + self.settings.pixel_radius,
-                                     outline=outline,
-                                     tag=tag)
-
-                    error = error + delta_err
-                    if error >= 1.0:
-                        y += dir_y
-                        error = error - 1.0
-
-            else:
-                delta_err = (delta_x + 1) / (delta_y + 1)
-                x = x0
-
-                for y in range(int(y0), int(y1) + 1, dir_y):
-                    self.create_oval(x - self.settings.pixel_radius,
-                                     y - self.settings.pixel_radius,
-                                     x + self.settings.pixel_radius,
-                                     y + self.settings.pixel_radius,
-                                     outline=outline,
-                                     tag=tag)
-
-                    error = error + delta_err
-                    if error >= 1.0:
-                        x += dir_x
-                        error = error - 1.0
-
-        else:
-            return NotImplemented
-
-    def __int_bresenham_line(self, start, finish, outline="darkred", tag="None"):
-        if isinstance(start, Vector) and isinstance(finish, Vector):
-            x0, x1 = start.x, finish.x
-            y0, y1 = start.y, finish.y
-
-            delta_x = abs(x1 - x0)
-            delta_y = abs(y1 - y0)
-
-            error = 0.0
-
-            dir_y = 1 if y1 - y0 > 0 else -1
-            dir_x = 1 if x1 - x0 > 0 else -1
-
-            if abs(x1 - x0) > abs(y1 - y0):
-                delta_err = (delta_y + 1)
-                y = y0
-
-                for x in range(int(x0), int(x1) + 1, dir_x):
-                    self.create_oval(x - self.settings.pixel_radius,
-                                     y - self.settings.pixel_radius,
-                                     x + self.settings.pixel_radius,
-                                     y + self.settings.pixel_radius,
-                                     outline=outline,
-                                     tag=tag)
-
-                    error = error + delta_err
-                    if error >= (delta_x + 1):
-                        y += dir_y
-                        error = error - (delta_x + 1)
-
-            else:
-                delta_err = (delta_x + 1)
-                x = x0
-
-                for y in range(int(y0), int(y1) + 1, dir_y):
-                    self.create_oval(x - self.settings.pixel_radius,
-                                     y - self.settings.pixel_radius,
-                                     x + self.settings.pixel_radius,
-                                     y + self.settings.pixel_radius,
-                                     outline=outline,
-                                     tag=tag)
-
-                    error = error + delta_err
-                    if error >= (delta_y + 1):
-                        x += dir_x
-                        error = error - (delta_y + 1)
-
-        else:
-            return NotImplemented
-
-    def __no_angle_bresenham_line(self, start, finish, outline="darkred", tag="None"):
-        if isinstance(start, Vector) and isinstance(finish, Vector):
-            de = 0.3
-
-            x0, x1 = start.x, finish.x
-            y0, y1 = start.y, finish.y
-            i = 2
-            x = x0
-            y = y0
-            delta_x = x1 - x0
-            delta_y = y1 - y0
-            e = 1 / 2
-            dir_y = 1 if y1 - y0 > 0 else -1
-            dir_x = 1 if x1 - x0 > 0 else -1
-
-            if abs(x1 - x0) > abs(y1 - y0):
-                m = abs((i * delta_y) / delta_x)
-                w = i - m
-                self.create_oval(x - self.settings.pixel_radius,
-                                 y - self.settings.pixel_radius,
-                                 x + self.settings.pixel_radius,
-                                 y + self.settings.pixel_radius,
-                                 outline=self.___change_color(outline, modf(m / 2)[0]),
-                                 tag=tag)
-                for x in range(int(x0), int(x1) + 1, dir_x):
-                    if e < w:
-                        x = x + dir_x
-                        e = e + m
-                    else:
-                        x = x + dir_x
-                        y = y + dir_y
-                        e = e - w
-                    self.create_oval(x - self.settings.pixel_radius,
-                                     y - self.settings.pixel_radius,
-                                     x + self.settings.pixel_radius,
-                                     y + self.settings.pixel_radius,
-                                     outline=self.___change_color(outline, modf(e)[0]),
-                                     tag=tag)
-            else:
-                m = abs((i * delta_x) / delta_y)
-                w = i - m
-                self.create_oval(x - self.settings.pixel_radius,
-                                 y - self.settings.pixel_radius,
-                                 x + self.settings.pixel_radius,
-                                 y + self.settings.pixel_radius,
-                                 outline=self.___change_color(outline, modf(m / 2)[0]),
-                                 tag=tag)
-                for y in range(int(y0), int(y1) + 1, dir_y):
-                    if e < w:
-                        y += dir_y
-                        e += m
-                    else:
-                        y += dir_y
-                        x += dir_x
-                        e -= w
-                    self.create_oval(x - self.settings.pixel_radius,
-                                     y - self.settings.pixel_radius,
-                                     x + self.settings.pixel_radius,
-                                     y + self.settings.pixel_radius,
-                                     outline=self.___change_color(outline, modf(e)[0]),
-                                     tag=tag)
-
-        else:
-            return NotImplemented
-
-    def __wu_line(self, start, finish, outline="darkred", tag="None"):
-        if isinstance(start, Vector) and isinstance(finish, Vector):
-            x0, x1 = start.x, finish.x
-            y0, y1 = start.y, finish.y
-
-            if abs(x1 - x0) > abs(y1 - y0):
-                if x1 < x0:
-                    x0, x1 = x1, x0
-                    y0, y1 = y1, y0
-
-                delta_x = x1 - x0
-                delta_y = y1 - y0
-                gradient = delta_y / delta_x
-
-                # обработать начальную точку
-
-                x_end = round(x0)
-                y_end = y0 + gradient * (x_end - x0)
-
-                x_gap = 1 - modf((x0 + 0.5))[0]
-                x_pxl1 = x_end
-
-                y_pxl1 = modf(y_end)[1]
-
-                self.create_oval(x_pxl1 - self.settings.pixel_radius,
-                                 y_pxl1 - self.settings.pixel_radius,
-                                 x_pxl1 + self.settings.pixel_radius,
-                                 y_pxl1 + self.settings.pixel_radius,
-                                 outline=self.___change_color(outline, (1 - modf(y_end)[0]) * x_gap),
-                                 tag=tag)
-
-                self.create_oval(x_pxl1 - self.settings.pixel_radius,
-                                 y_pxl1 + 1 - self.settings.pixel_radius,
-                                 x_pxl1 + self.settings.pixel_radius,
-                                 y_pxl1 + 1 + self.settings.pixel_radius,
-                                 outline=self.___change_color(outline, modf(y_end)[0] * x_gap),
-                                 tag=tag)
-
-                inter_y = y_end + gradient # первое y - пересечение дл цикла
-
-                # обработать конечную точку
-
-                x_end = round(x1)
-                y_end = y1 + gradient * (x_end - x1)
-                x_gap = modf(x1 + 0.5)[0]
-                x_pxl2 = x_end
-                y_pxl2 = modf(y_end)[1]
-
-                self.create_oval(x_pxl2 - self.settings.pixel_radius,
-                                 y_pxl2 - self.settings.pixel_radius,
-                                 x_pxl2 + self.settings.pixel_radius,
-                                 y_pxl2 + self.settings.pixel_radius,
-                                 outline=self.___change_color(outline, (1 - modf(y_end)[0]) * x_gap),
-                                 tag=tag)
-
-                self.create_oval(x_pxl2 - self.settings.pixel_radius,
-                                 y_pxl2 + 1 - self.settings.pixel_radius,
-                                 x_pxl2 + self.settings.pixel_radius,
-                                 y_pxl2 + 1 + self.settings.pixel_radius,
-                                 outline=self.___change_color(outline, modf(y_end)[0] * x_gap),
-                                 tag=tag)
-
-                # основной цикл
-                for x in range(x_pxl1, x_pxl2 + 1):
-                    self.create_oval(x - self.settings.pixel_radius,
-                                     modf(inter_y)[1] - self.settings.pixel_radius,
-                                     x + self.settings.pixel_radius,
-                                     modf(inter_y)[1] + self.settings.pixel_radius,
-                                     outline=self.___change_color(outline, 1 - modf(inter_y)[0]),
-                                     tag=tag)
-
-                    self.create_oval(x - self.settings.pixel_radius,
-                                     modf(inter_y)[1] + 1 - self.settings.pixel_radius,
-                                     x + self.settings.pixel_radius,
-                                     modf(inter_y)[1] + 1 + self.settings.pixel_radius,
-                                     outline=self.___change_color(outline, modf(inter_y)[0]),
-                                     tag=tag)
-                    inter_y = inter_y + gradient
-
-            else:
-                if y1 < y0:
-                    x0, x1 = x1, x0
-                    y0, y1 = y1, y0
-
-                delta_x = x1 - x0
-                delta_y = y1 - y0
-                gradient = delta_x / delta_y
-
-                # обработать начальную точку
-
-                y_end = round(y0)
-                x_end = x0 + gradient * (y_end - y0)
-
-                y_gap = 1 - modf((y0 + 0.5))[0]
-                y_pxl1 = y_end
-
-                x_pxl1 = modf(x_end)[1]
-
-                self.create_oval(x_pxl1 - self.settings.pixel_radius,
-                                 y_pxl1 - self.settings.pixel_radius,
-                                 x_pxl1 + self.settings.pixel_radius,
-                                 y_pxl1 + self.settings.pixel_radius,
-                                 outline=self.___change_color(outline, (1 - modf(x_end)[0]) * y_gap),
-                                 tag=tag)
-
-                self.create_oval(x_pxl1 + 1 - self.settings.pixel_radius,
-                                 y_pxl1 - self.settings.pixel_radius,
-                                 x_pxl1 + 1 + self.settings.pixel_radius,
-                                 y_pxl1 + self.settings.pixel_radius,
-                                 outline=self.___change_color(outline, modf(x_end)[0] * y_gap),
-                                 tag=tag)
-
-                inter_x = x_end + gradient # первое y - пересечение дл цикла
-
-                # обработать конечную точку
-
-                y_end = round(y1)
-                x_end = x1 + gradient * (y_end - y1)
-                y_gap = modf(y1 + 0.5)[0]
-                y_pxl2 = y_end
-                x_pxl2 = modf(x_end)[1]
-
-                self.create_oval(x_pxl2 - self.settings.pixel_radius,
-                                 y_pxl2 - self.settings.pixel_radius,
-                                 x_pxl2 + self.settings.pixel_radius,
-                                 y_pxl2 + self.settings.pixel_radius,
-                                 outline=self.___change_color(outline, (1 - modf(x_end)[0]) * y_gap),
-                                 tag=tag)
-
-                self.create_oval(x_pxl2 + 1 - self.settings.pixel_radius,
-                                 y_pxl2 - self.settings.pixel_radius,
-                                 x_pxl2 + 1 + self.settings.pixel_radius,
-                                 y_pxl2 + self.settings.pixel_radius,
-                                 outline=self.___change_color(outline, modf(x_end)[0] * y_gap),
-                                 tag=tag)
-
-                # основной цикл
-                for y in range(y_pxl1, y_pxl2 + 1):
-                    self.create_oval(modf(inter_x)[1] - self.settings.pixel_radius,
-                                     y - self.settings.pixel_radius,
-                                     modf(inter_x)[1] + self.settings.pixel_radius,
-                                     y + self.settings.pixel_radius,
-                                     outline=self.___change_color(outline, 1 - modf(inter_x)[0]),
-                                     tag=tag)
-
-                    self.create_oval(modf(inter_x)[1] + 1 - self.settings.pixel_radius,
-                                     y - self.settings.pixel_radius,
-                                     modf(inter_x)[1] + 1 + self.settings.pixel_radius,
-                                     y + self.settings.pixel_radius,
-                                     outline=self.___change_color(outline, modf(inter_x)[0]),
-                                     tag=tag)
-                    inter_x = inter_x + gradient
-
-        else:
-            return NotImplemented
-
-    def ___change_color(self, rgb, k):
-        print(rgb, k)
-        _rgb = rgb.strip("#")
-        _r = _rgb[0:2]
-        _g = _rgb[2:4]
-        _b = _rgb[4:6]
-        r = int(_r, 16)
-        g = int(_g, 16)
-        b = int(_b, 16)
-
-        hsv = rgb_to_hsv(r, g, b)
-
-        new_rgb = hsv_to_rgb(hsv[0], hsv[1] * k, hsv[2])
-
-        rh = ('0' + str(hex(int(new_rgb[0]))[2:].upper()))[-2:]
-        gh = ('0' + str(hex(int(new_rgb[1]))[2:].upper()))[-2:]
-        bh = ('0' + str(hex(int(new_rgb[2]))[2:].upper()))[-2:]
-
-        result = f"#{rh}{gh}{bh}"
-
-        print("--->", result)
-        return result
-
-
-
+            return answer
+
+    def draw_bunch(self, center, line_len, degree_angle_step, mod, color, tag):
+        default_dot = Vector(center.x + line_len, center.y)
+        angle = 0
+
+        while abs(angle) < degrees(2 * pi):
+            second_dot = rotate(default_dot, radians(angle), center)
+            self.draw_line(center, second_dot, mod, color, tag)
+            angle += degree_angle_step
