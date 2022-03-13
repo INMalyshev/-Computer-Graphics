@@ -199,6 +199,8 @@ class App(tkinter.Tk):
             'wu'
             ]
 
+            tag = 'todel'
+
             if item['type'] == 'line':
                 line_len = distance(item['start'], item['finish'])
                 if line_len == 0:
@@ -207,12 +209,21 @@ class App(tkinter.Tk):
                 dx = item['finish'].x - item['start'].x
                 sin_val = dx / line_len
                 degree_angle = degrees(acos(sin_val))
-                tag = 'todel'
                 steps_am = self.canvas.draw_line(item['start'], item['finish'], item['mod'], item['color'], tag)
                 self.canvas.delete(tag)
 
                 tbl = PrettyTable()
                 tbl.add_column('method', [methods[item['mod']]])
-                tbl.add_column('angle', [degree_angle])
+                tbl.add_column('angle', [round(degree_angle, 2)])
                 tbl.add_column('step amount', [steps_am])
+                print(tbl)
+
+            elif item['type'] == 'bunch':
+                angles, steps = self.canvas.draw_bunch(item['center'], item['line_len'], item['angle_step'], item['mod'], item['color'], tag)
+                self.canvas.delete(tag)
+
+                tbl = PrettyTable()
+                tbl.add_column('method', [methods[item['mod']] for i in range(len(angles))])
+                tbl.add_column('angle', list(map(lambda x: round(x, 2), angles)))
+                tbl.add_column('step amount', steps)
                 print(tbl)

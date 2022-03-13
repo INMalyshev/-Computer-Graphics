@@ -390,7 +390,8 @@ def calculate_steps(data):
         x_arr, y_arr = y_arr, x_arr
 
     def my_tan(x0, y0, x1, y1):
-        return ((y1 - y0) * 1000000 + 1) / ((x1 - x0) * 1000000 + 1)
+        k = 1000000000
+        return ((y1 - y0) * k + 1) / ((x1 - x0) * k + 1)
 
     odds = [my_tan(x_arr[i-1], y_arr[i-1], x_arr[i], y_arr[i]) for i in range(1, len(x_arr))]
 

@@ -177,8 +177,14 @@ class MyCanvas(Canvas):
     def draw_bunch(self, center, line_len, degree_angle_step, mod, color, tag):
         default_dot = Vector(center.x + line_len, center.y)
         angle = 0
+        angles = []
+        steps = []
 
         while abs(angle) < degrees(2 * pi):
             second_dot = rotate(default_dot, radians(angle), center)
-            self.draw_line(center, second_dot, mod, color, tag)
+            step_am = self.draw_line(center, second_dot, mod, color, tag)
+            angles.append(angle)
+            steps.append(step_am)
             angle += degree_angle_step
+
+        return angles, steps
