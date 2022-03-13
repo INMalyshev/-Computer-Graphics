@@ -106,6 +106,11 @@ class MyAddBunchForm(Toplevel):
         try:
             line_len = float(buffer[2])
 
+            if line_len == 0:
+                showerror("line len error", "line len cannot be equal to zero")
+                return None
+
+
         except:
             showerror("line len error", "line len is not a float number")
             return None

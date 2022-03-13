@@ -1,6 +1,8 @@
 import tkinter
 from tkinter import colorchooser
 
+from prettytable import PrettyTable
+
 from src.ui.my_canvas import MyCanvas
 from src.ui.my_menu import MyMenu
 from src.ui.my_text import MyText
@@ -13,6 +15,9 @@ from src.ui.add_bunch_form import MyAddBunchForm
 from src.ui.del_with_id_form import MyDelWithIdForm
 
 import copy
+
+from math import acos, degrees
+from src.calculations.analitic_geometry import distance
 
 
 class App(tkinter.Tk):
@@ -70,6 +75,9 @@ class App(tkinter.Tk):
         self.add_line_button.pack(fill="both")
 
         self.add_line_button = MyButton(self, "add bunch", self.__handle_add_bunch_button)
+        self.add_line_button.pack(fill="both")
+
+        self.add_line_button = MyButton(self, "gen stat with id", self.__handle_gen_stat_with_id_button)
         self.add_line_button.pack(fill="both")
 
         self.add_line_button = MyButton(self, "del with id", self.__handle_del_with_id_button)
@@ -171,3 +179,40 @@ class App(tkinter.Tk):
             self._make_record()
             self.position._data.append(answer)
             self._set_position()
+
+    def __handle_gen_stat_with_id_button(self, event=None):
+        new_window = MyDelWithIdForm(self)
+        id = new_window.handle_open()
+
+        if id is None:
+            return
+
+        if id >= 0 and id < len(self.position._data):
+            item = self.position._data[id]
+
+            methods = [
+            'default',
+            'dda',
+            'bresenham',
+            'int bresenham',
+            'no angle bresenham',
+            'wu'
+            ]
+
+            if item['type'] == 'line':
+                line_len = distance(item['start'], item['finish'])
+                if line_len == 0:
+                    print('line len eq zero')
+                    return
+                dx = item['finish'].x - item['start'].x
+                sin_val = dx / line_len
+                degree_angle = degrees(acos(sin_val))
+                tag = 'todel'
+                steps_am = self.canvas.draw_line(item['start'], item['finish'], item['mod'], item['color'], tag)
+                self.canvas.delete(tag)
+
+                tbl = PrettyTable()
+                tbl.add_column('method', [methods[item['mod']]])
+                tbl.add_column('angle', [degree_angle])
+                tbl.add_column('step amount', [steps_am])
+                print(tbl)

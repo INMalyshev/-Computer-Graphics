@@ -13,11 +13,11 @@ class MyDelWithIdForm(Toplevel):
         super().__init__(parent)
         self.id = StringVar()
 
-        label = Label(self, text="del with id")
+        label = Label(self, text="input id")
 
         entry_id = Entry(self, textvariable=self.id)
 
-        self.btn_del = Button(self, text="del")
+        self.btn_del = Button(self, text="ok")
 
         label.grid(row=0, columnspan=2)
 
