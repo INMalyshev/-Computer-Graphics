@@ -1,5 +1,6 @@
 import tkinter
 from tkinter import colorchooser
+from tkinter import Frame
 
 from prettytable import PrettyTable
 
@@ -13,6 +14,7 @@ from src.ui.my_button import MyButton
 from src.ui.add_line_form import MyAddLineForm
 from src.ui.add_bunch_form import MyAddBunchForm
 from src.ui.del_with_id_form import MyDelWithIdForm
+from src.ui.text_form import MyTextForm
 
 import copy
 
@@ -70,18 +72,26 @@ class App(tkinter.Tk):
         self.canvas.pack(fill="both", expand=True)
 
         # Кнопки
+        # self.buttons = Frame(self)
+        # self.buttons.pack(fill="both")
+        # self.buttons.grid_rowconfigure(0, weight=4)
+
 
         self.add_line_button = MyButton(self, "add line", self.__handle_add_line_button)
         self.add_line_button.pack(fill="both")
+        # self.add_line_button.grid(row=0, column=0)
 
-        self.add_line_button = MyButton(self, "add bunch", self.__handle_add_bunch_button)
-        self.add_line_button.pack(fill="both")
+        self.add_bunch_button = MyButton(self, "add bunch", self.__handle_add_bunch_button)
+        self.add_bunch_button.pack(fill="both")
+        # self.add_bunch_button.grid(row=0, column=1)
 
-        self.add_line_button = MyButton(self, "gen stat with id", self.__handle_gen_stat_with_id_button)
-        self.add_line_button.pack(fill="both")
+        self.gen_stat_button = MyButton(self, "gen stat with id", self.__handle_gen_stat_with_id_button)
+        self.gen_stat_button.pack(fill="both")
+        # self.gen_stat_button.grid(row=0, column=2)
 
-        self.add_line_button = MyButton(self, "del with id", self.__handle_del_with_id_button)
-        self.add_line_button.pack(fill="both")
+        self.del_button = MyButton(self, "del with id", self.__handle_del_with_id_button)
+        self.del_button.pack(fill="both")
+        # self.del_button.grid(row=0, column=3, sticky='ws')
 
         # Text
 
@@ -201,6 +211,8 @@ class App(tkinter.Tk):
 
             tag = 'todel'
 
+            tbl = PrettyTable()
+
             if item['type'] == 'line':
                 line_len = distance(item['start'], item['finish'])
                 if line_len == 0:
@@ -212,18 +224,17 @@ class App(tkinter.Tk):
                 steps_am = self.canvas.draw_line(item['start'], item['finish'], item['mod'], item['color'], tag)
                 self.canvas.delete(tag)
 
-                tbl = PrettyTable()
                 tbl.add_column('method', [methods[item['mod']]])
                 tbl.add_column('angle', [round(degree_angle, 2)])
                 tbl.add_column('step amount', [steps_am])
-                print(tbl)
 
             elif item['type'] == 'bunch':
                 angles, steps = self.canvas.draw_bunch(item['center'], item['line_len'], item['angle_step'], item['mod'], item['color'], tag)
                 self.canvas.delete(tag)
 
-                tbl = PrettyTable()
                 tbl.add_column('method', [methods[item['mod']] for i in range(len(angles))])
                 tbl.add_column('angle', list(map(lambda x: round(x, 2), angles)))
                 tbl.add_column('step amount', steps)
-                print(tbl)
+
+            new_window = MyTextForm(self, str(tbl))
+            new_window.open()
