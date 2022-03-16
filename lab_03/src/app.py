@@ -21,6 +21,7 @@ import copy
 from math import acos, degrees
 from src.calculations.analitic_geometry import distance
 
+from src.ui.bar_form import MyBarForm
 
 class App(tkinter.Tk):
     def __init__(self):
@@ -228,6 +229,9 @@ class App(tkinter.Tk):
                 tbl.add_column('angle', [round(degree_angle, 2)])
                 tbl.add_column('step amount', [steps_am])
 
+                # new_new_window = MyBarForm([round(degree_angle, 2)], [steps_am])
+                # new_new_window.open()
+
             elif item['type'] == 'bunch':
                 angles, steps = self.canvas.draw_bunch(item['center'], item['line_len'], item['angle_step'], item['mod'], item['color'], tag)
                 self.canvas.delete(tag)
@@ -235,6 +239,9 @@ class App(tkinter.Tk):
                 tbl.add_column('method', [methods[item['mod']] for i in range(len(angles))])
                 tbl.add_column('angle', list(map(lambda x: round(x, 2), angles)))
                 tbl.add_column('step amount', steps)
+
+                # new_new_window = MyBarForm(list(map(lambda x: round(x, 2), angles)), steps)
+                # new_new_window.open()
 
             new_window = MyTextForm(self, str(tbl))
             new_window.open()

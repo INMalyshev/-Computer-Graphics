@@ -126,12 +126,13 @@ class MyCanvas(Canvas):
     # lab_03
 
     def pri_pix(self, x, y, color, tag):
-        self.create_oval(x - self.settings.pixel_radius,
-                         y - self.settings.pixel_radius,
-                         x + self.settings.pixel_radius,
-                         y + self.settings.pixel_radius,
-                         outline=color,
-                         tag=tag)
+        # self.create_oval(x - self.settings.pixel_radius,
+        #                  y - self.settings.pixel_radius,
+        #                  x + self.settings.pixel_radius,
+        #                  y + self.settings.pixel_radius,
+        #                  outline=color,
+        #                  tag=tag)
+        self.create_polygon([x, y], [x + 1, y], [x + 1, y + 1], [x, y + 1], fill=color, tag=tag)
 
     def draw_line(self, a, b, mod, color, tag):
         # Возвращает количество ступенек или None, если defaul или исключение
