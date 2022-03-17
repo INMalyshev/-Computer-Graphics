@@ -229,8 +229,8 @@ class App(tkinter.Tk):
                 tbl.add_column('angle', [round(degree_angle, 2)])
                 tbl.add_column('step amount', [steps_am])
 
-                # new_new_window = MyBarForm([round(degree_angle, 2)], [steps_am])
-                # new_new_window.open()
+                new_new_window = MyBarForm(self, [round(degree_angle, 2)], [steps_am])
+                new_new_window.open()
 
             elif item['type'] == 'bunch':
                 angles, steps = self.canvas.draw_bunch(item['center'], item['line_len'], item['angle_step'], item['mod'], item['color'], tag)
@@ -240,8 +240,9 @@ class App(tkinter.Tk):
                 tbl.add_column('angle', list(map(lambda x: round(x, 2), angles)))
                 tbl.add_column('step amount', steps)
 
-                # new_new_window = MyBarForm(list(map(lambda x: round(x, 2), angles)), steps)
-                # new_new_window.open()
+                # new_new_window = MyBarForm(self, list(map(lambda x: round(x, 2), angles)), steps)
+                new_new_window = MyBarForm(self, angles, steps)
+                new_new_window.open()
 
-            new_window = MyTextForm(self, str(tbl))
-            new_window.open()
+            # new_window = MyTextForm(self, str(tbl))
+            # new_window.open()
