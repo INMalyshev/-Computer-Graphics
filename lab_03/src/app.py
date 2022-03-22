@@ -22,6 +22,7 @@ from math import acos, degrees
 from src.calculations.analitic_geometry import distance
 
 from src.ui.bar_form import MyBarForm
+from tkinter.messagebox import showerror
 
 class App(tkinter.Tk):
     def __init__(self):
@@ -201,18 +202,11 @@ class App(tkinter.Tk):
         if id >= 0 and id < len(self.position._data):
             item = self.position._data[id]
 
-            methods = [
-            'default',
-            'dda',
-            'bresenham',
-            'int bresenham',
-            'no angle bresenham',
-            'wu'
-            ]
+            if item['mod'] == 0:
+                showerror('default method', 'default method cannot be calculated')
+                return
 
             tag = 'todel'
-
-            tbl = PrettyTable()
 
             if item['type'] == 'line':
                 line_len = distance(item['start'], item['finish'])
@@ -225,10 +219,6 @@ class App(tkinter.Tk):
                 steps_am = self.canvas.draw_line(item['start'], item['finish'], item['mod'], item['color'], tag)
                 self.canvas.delete(tag)
 
-                tbl.add_column('method', [methods[item['mod']]])
-                tbl.add_column('angle', [round(degree_angle, 2)])
-                tbl.add_column('step amount', [steps_am])
-
                 new_new_window = MyBarForm(self, [round(degree_angle, 2)], [steps_am])
                 new_new_window.open()
 
@@ -236,13 +226,5 @@ class App(tkinter.Tk):
                 angles, steps = self.canvas.draw_bunch(item['center'], item['line_len'], item['angle_step'], item['mod'], item['color'], tag)
                 self.canvas.delete(tag)
 
-                tbl.add_column('method', [methods[item['mod']] for i in range(len(angles))])
-                tbl.add_column('angle', list(map(lambda x: round(x, 2), angles)))
-                tbl.add_column('step amount', steps)
-
-                # new_new_window = MyBarForm(self, list(map(lambda x: round(x, 2), angles)), steps)
                 new_new_window = MyBarForm(self, angles, steps)
                 new_new_window.open()
-
-            # new_window = MyTextForm(self, str(tbl))
-            # new_window.open()
