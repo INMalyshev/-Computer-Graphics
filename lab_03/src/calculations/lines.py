@@ -356,26 +356,41 @@ def wu_line(start, finish, outline="darkred", tag="None"):
         print('---> something wrong with __no_angle_bresenham_line method')
         return None
 
+# def ___change_color(rgb, k):
+#     _rgb = rgb.strip("#")
+#     _r = _rgb[0:2]
+#     _g = _rgb[2:4]
+#     _b = _rgb[4:6]
+#     r = int(_r, 16)
+#     g = int(_g, 16)
+#     b = int(_b, 16)
+#
+#     hsv = rgb_to_hsv(r, g, b)
+#
+#     new_rgb = hsv_to_rgb(hsv[0], hsv[1] * k, hsv[2])
+#
+#     rh = ('0' + str(hex(int(new_rgb[0]))[2:].upper()))[-2:]
+#     gh = ('0' + str(hex(int(new_rgb[1]))[2:].upper()))[-2:]
+#     bh = ('0' + str(hex(int(new_rgb[2]))[2:].upper()))[-2:]
+#
+#     result = f"#{rh}{gh}{bh}"
+#
+#     return result
+
 def ___change_color(rgb, k):
-    _rgb = rgb.strip("#")
-    _r = _rgb[0:2]
-    _g = _rgb[2:4]
-    _b = _rgb[4:6]
-    r = int(_r, 16)
-    g = int(_g, 16)
-    b = int(_b, 16)
+    _rgb = rgb.strip('#')
+    r = int(_rgb[0:2], 16)
+    g = int(_rgb[2:4], 16)
+    b = int(_rgb[4:6], 16)
+    h, s, v = rgb_to_hsv(r, g, b)
+    s *= k
 
-    hsv = rgb_to_hsv(r, g, b)
+    rh = '0' + str(hex(int(r * 255))[2:].upper())
+    gh = '0' + str(hex(int(g * 255))[2:].upper())
+    bh = '0' + str(hex(int(b * 255))[2:].upper())
 
-    new_rgb = hsv_to_rgb(hsv[0], hsv[1] * k, hsv[2])
+    return f'#{rh[-2:]}{gh[-2:]}{bh[-2:]}'
 
-    rh = ('0' + str(hex(int(new_rgb[0]))[2:].upper()))[-2:]
-    gh = ('0' + str(hex(int(new_rgb[1]))[2:].upper()))[-2:]
-    bh = ('0' + str(hex(int(new_rgb[2]))[2:].upper()))[-2:]
-
-    result = f"#{rh}{gh}{bh}"
-
-    return result
 
 def calculate_steps(data):
     if data is None:
