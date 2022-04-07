@@ -9,6 +9,10 @@ from src.vector import Vector
 from src.cadre import Cadre
 from src.ui.my_button import MyButton
 from src.ui.del_with_id_form import MyDelWithIdForm
+from src.ui.add_circle_form import MyAddCircleForm
+from src.ui.add_circle_bunch_form import MyAddCircleBunchForm
+from src.ui.add_ellipse_form import MyAddEllipseForm
+from src.ui.add_ellipse_bunch_form import MyAddEllipseBunchForm
 
 import copy
 
@@ -16,6 +20,7 @@ from math import acos, degrees
 from src.calculations.analitic_geometry import distance
 
 from tkinter.messagebox import showerror
+
 
 class App(tkinter.Tk):
     def __init__(self):
@@ -67,7 +72,20 @@ class App(tkinter.Tk):
         self.canvas.pack(fill="both", expand=True)
 
         # Кнопки
+        self.add_circle_button = MyButton(self, 'add circle', self.__handle_add_circle_button)
+        self.add_circle_button.pack(fill="both")
 
+        self.add_circle_bunch_button = MyButton(self, 'add circle bunch', self.__handle_add_circle_bunch_button)
+        self.add_circle_bunch_button.pack(fill="both")
+
+        self.add_ellipse_button = MyButton(self, 'add ellipse', self.__handle_add_ellipse_button)
+        self.add_ellipse_button.pack(fill="both")
+
+        self.add_ellipse_bunch_button = MyButton(self, 'add ellipse bunch', self.__handle_add_ellipse_bunch_button)
+        self.add_ellipse_bunch_button.pack(fill="both")
+
+        self.add_circle_bunch_button = MyButton(self, 'del with id', self.__handle_del_with_id_button)
+        self.add_circle_bunch_button.pack(fill="both")
 
         # Text
 
@@ -77,12 +95,10 @@ class App(tkinter.Tk):
         # Бинды чисто для лабы
 
 
-
     def start(self):
         self.mainloop()
 
     def _set_position(self):
-        pass
         self.canvas._set_position(self.position)
         self.text_list.set_text(self.___gen_text())
 
@@ -100,24 +116,23 @@ class App(tkinter.Tk):
         self._set_position()
 
     def _make_record(self):
-        pass
-        # self.position = self.position.add(copy.deepcopy(self.position._data))
+        self.position = self.position.add(copy.deepcopy(self.position._data))
 
 
     def _backward(self, event):
-        # self.position = self.position.backward()
+        self.position = self.position.backward()
 
         self._set_position()
 
     def _forward(self, event):
-        # self.position = self.position.forward()
+        self.position = self.position.forward()
 
         self._set_position()
 
     def _rewind(self):
         self._make_record()
 
-        # self.position._data = copy.deepcopy(list())
+        self.position._data = copy.deepcopy(list())
 
         self._set_position()
 
@@ -128,24 +143,67 @@ class App(tkinter.Tk):
         self.canvas.configure(bg=color[1])
 
     def __handle_del_with_id_button(self, event=None):
-        pass
-        # new_window = MyDelWithIdForm(self)
-        # id = new_window.handle_open()
-        #
-        # if id is None:
-        #     return
-        #
-        # if id >= 0 and id < len(self.position._data):
-        #     self._make_record()
-        #     del self.position._data[id]
-        #     self._set_position()
+        new_window = MyDelWithIdForm(self)
+        id = new_window.handle_open()
+
+        if id is None:
+            return
+
+        if id >= 0 and id < len(self.position._data):
+            self._make_record()
+            del self.position._data[id]
+            self._set_position()
+
+    def __handle_add_circle_button(self, event=None):
+        new_window = MyAddCircleForm(self)
+        answer = new_window.handle_open()
+
+        if answer is not None:
+            self._make_record()
+            self.position._data.append(answer)
+            self._set_position()
+
+    def __handle_add_ellipse_button(self, event=None):
+        new_window = MyAddEllipseForm(self)
+        answer = new_window.handle_open()
+
+        if answer is not None:
+            self._make_record()
+            self.position._data.append(answer)
+            self._set_position()
+
+    def __handle_add_circle_bunch_button(self, event=None):
+        new_window = MyAddCircleBunchForm(self)
+        answer = new_window.handle_open()
+
+        if answer is not None:
+            self._make_record()
+            self.position._data.append(answer)
+            self._set_position()
+
+    def __handle_add_ellipse_bunch_button(self, event=None):
+        new_window = MyAddEllipseBunchForm(self)
+        answer = new_window.handle_open()
+
+        if answer is not None:
+            self._make_record()
+            self.position._data.append(answer)
+            self._set_position()
+
 
     def ___gen_text(self):
         text = ''
-        # for i in range(len(self.position._data)):
-            # if self.position._data[i]['type'] == 'line':
-            #     text += f"id: {i}, {self.position._data[i]['type']}, start: {self.position._data[i]['start']}, end: {self.position._data[i]['finish']}\n"
-            #
-            # elif self.position._data[i]['type'] == 'bunch':
-            #     text += f"id: {i}, {self.position._data[i]['type']}, center: {self.position._data[i]['center']}, andle step: {self.position._data[i]['angle_step']}\n"
+        for i in range(len(self.position._data)):
+            if self.position._data[i]['type'] == 'circle':
+                text += f"id: {i}, {self.position._data[i]['type']}, center: {self.position._data[i]['center']}, radius: {self.position._data[i]['radius']}\n"
+
+            elif self.position._data[i]['type'] == 'circle_bunch':
+                text += f"id: {i}, {self.position._data[i]['type']}, center: {self.position._data[i]['center']}, circles: {int(self.position._data[i]['circle_amount'])}\n"
+
+            elif self.position._data[i]['type'] == 'ellipse':
+                text += f"id: {i}, {self.position._data[i]['type']}, center: {self.position._data[i]['center']}, a: {self.position._data[i]['x_radius']}, b: {self.position._data[i]['y_radius']}\n"
+
+            elif self.position._data[i]['type'] == 'ellipse_bunch':
+                text += f"id: {i}, {self.position._data[i]['type']}, center: {self.position._data[i]['center']}, a: {self.position._data[i]['min_radius_x']} - {self.position._data[i]['max_radius_x']}, b: {self.position._data[i]['min_radius_y']} - {self.position._data[i]['max_radius_y']}, ellipses: {int(self.position._data[i]['ellipse_amount'])}\n"
+
         return text

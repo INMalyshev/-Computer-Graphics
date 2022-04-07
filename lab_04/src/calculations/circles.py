@@ -5,10 +5,23 @@ from src.vector import Vector
 def canonical_equation_circle(center, radius, outline='darkred', tag='non'):   # gets canvas coordinates
     # (X-Xo) + (Y-Yo) = R
     dots = []
-    for x in range(center.x - radius, center.x + radius + 1, 1):
-        y = math.sqrt(radius * radius - (x - center.x) * (x - center.x)) + center.y
-        dots.append(Vector(x, y))
-        dots.append(Vector(x, -y))
+
+    y = radius
+    x = 0
+
+    while x <= y:
+        dots.append(Vector(x + center.x, y + center.y))
+        dots.append(Vector(x + center.x, -y + center.y))
+        dots.append(Vector(-x + center.x, y + center.y))
+        dots.append(Vector(-x + center.x, -y + center.y))
+
+        dots.append(Vector(y + center.y, x + center.x))
+        dots.append(Vector(-y + center.y, x + center.x))
+        dots.append(Vector(y + center.y, -x + center.x))
+        dots.append(Vector(-y + center.y, -x + center.x))
+
+        y = math.sqrt(radius * radius - x * x)
+        x += 1
 
     cols = [outline for _ in range(len(dots))]
     tags = [tag for _ in range(len(dots))]
@@ -33,19 +46,25 @@ def parametric_equation_circle(center, radius, outline='darkred', tag='non'):
 
     return dots, cols, tags
 
-def bresenham_circle(center, radius, outline='darkred', tag='non'):
-    eps = 1e-5
 
-    x = center.x
-    y = center.y + radius
+def bresenham_circle(center, radius, outline='darkred', tag='non'):
+    eps = 2
+
+    x = 0
+    y = radius
 
     dot = Vector(x, y)
 
-    dots = [dot]
+    dots = []
 
-    for _ in range(int(radius)):
-        ddot = Vector(dot.x + 1, dot.y + 1)
-        k = radius * radius - abs(ddot - center) * abs(ddot - center)
+    dots.append(dot + center)
+    dots.append(Vector(x, -y) + center)
+    dots.append(Vector(-x, y) + center)
+    dots.append(Vector(-x, -y) + center)
+
+    while dot.y > 0:
+        ddot = Vector(dot.x + 1, dot.y - 1)
+        k = radius * radius - abs(ddot) * abs(ddot)
 
         if math.fabs(k) < eps:
             dot = Vector(dot.x + 1, dot.y - 1)
@@ -54,10 +73,52 @@ def bresenham_circle(center, radius, outline='darkred', tag='non'):
         else:
             dot = Vector(dot.x, dot.y - 1)
 
-        dots.append(dot)
-        dots.append(Vector(dot.x, dot.y - 2 * (dot.y - center.y)))
-        dots.append(Vector(dot.x - 2 * (dot.x - center.x), dot.y))
-        dots.append(Vector(dot.x - 2 * (dot.x - center.x), dot.y - 2 * (dot.y - center.y)))
+        dots.append(dot + center)
+        dots.append(Vector(dot.x, -dot.y) + center)
+        dots.append(Vector(-dot.x, dot.y) + center)
+        dots.append(Vector(-dot.x, -dot.y) + center)
+
+    cols = [outline for _ in range(len(dots))]
+    tags = [tag for _ in range(len(dots))]
+
+    return dots, cols, tags
+
+
+def middle_dot_circle(center, radius, outline='darkred', tag='non'):
+    x = 0
+    y = radius
+
+    dots = []
+
+    dot = Vector(x, y)
+
+    dots.append(center + dot)
+    dots.append(center - dot)
+    dots.append(center + Vector(dot.x, -dot.y))
+    dots.append(center + Vector(-dot.x, dot.y))
+
+    dots.append(center + Vector(dot.y, dot.x))
+    dots.append(center - Vector(dot.y, dot.x))
+    dots.append(center + Vector(dot.y, -dot.x))
+    dots.append(center + Vector(-dot.y, dot.x))
+
+    while dot.x <= dot.y:
+        k = radius * radius - abs(Vector(dot.x + 1, dot.y - 0.5)) * abs(Vector(dot.x + 1, dot.y - 0.5))
+
+        if k > 0:
+            dot = Vector(dot.x + 1, dot.y)
+        else:
+            dot = Vector(dot.x + 1, dot.y - 1)
+
+        dots.append(center + dot)
+        dots.append(center - dot)
+        dots.append(center + Vector(dot.x, -dot.y))
+        dots.append(center + Vector(-dot.x, dot.y))
+
+        dots.append(center + Vector(dot.y, dot.x))
+        dots.append(center - Vector(dot.y, dot.x))
+        dots.append(center + Vector(dot.y, -dot.x))
+        dots.append(center + Vector(-dot.y, dot.x))
 
     cols = [outline for _ in range(len(dots))]
     tags = [tag for _ in range(len(dots))]
