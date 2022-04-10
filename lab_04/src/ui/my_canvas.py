@@ -238,6 +238,14 @@ class MyCanvas(Canvas):
             return answer
 
     def draw_circle_bunch(self, center, min_radius, max_radius, circle_amount, mod, color, tag):
+        center_converted = self.vector2canvasCoordinates(center)
+        temp1 = self.vector2canvasCoordinates(Vector(center.x + min_radius, center.y))
+        temp2 = self.vector2canvasCoordinates(Vector(center.x + max_radius, center.y))
+        min_r_converted = int(abs(center_converted - temp1))
+        max_r_converted = int(abs(center_converted - temp2))
+        spare_pixels = max_r_converted - min_r_converted
+        circle_amount = min(circle_amount, spare_pixels) + 1
+
         r = min_radius
         dr = (max_radius - min_radius) / (circle_amount - 1)
         result = []
@@ -252,6 +260,20 @@ class MyCanvas(Canvas):
         return None if len(result) == 0 else result
 
     def draw_ellipse_bunch(self, center, min_radius_x, max_radius_x, min_radius_y, max_radius_y, ellipse_amount, mod, color, tag):
+        center_converted = self.vector2canvasCoordinates(center)
+        temp1 = self.vector2canvasCoordinates(Vector(center.x + min_radius_x, center.y))
+        temp2 = self.vector2canvasCoordinates(Vector(center.x + max_radius_x, center.y))
+        min_r_x_converted = int(abs(center_converted - temp1))
+        max_r_x_converted = int(abs(center_converted - temp2))
+        spare_pixels_x = max_r_x_converted - min_r_x_converted
+        temp1 = self.vector2canvasCoordinates(Vector(center.x + min_radius_y, center.y))
+        temp2 = self.vector2canvasCoordinates(Vector(center.x + max_radius_y, center.y))
+        min_r_y_converted = int(abs(center_converted - temp1))
+        max_r_y_converted = int(abs(center_converted - temp2))
+        spare_pixels_y = max_r_y_converted - min_r_y_converted
+        spare_pixels = max(spare_pixels_x, spare_pixels_y)
+        ellipse_amount = min(ellipse_amount, spare_pixels) + 1
+
         rx = min_radius_x
         drx = (max_radius_x - min_radius_x) / (ellipse_amount - 1)
         ry = min_radius_y
