@@ -10,6 +10,8 @@ from src.cadre import Cadre
 from src.calculations.circles import *
 from src.calculations.ellipses import *
 
+from src.utils.decorators import calculate_time
+
 
 class MyCanvas(Canvas):
     def __init__(self, parent):
@@ -114,27 +116,31 @@ class MyCanvas(Canvas):
             return NotImplemented
 
         for i in range(len(position._data)):
+            answer = None
+
             if position._data[i]["type"] == "circle":
-                self.draw_circle(position._data[i]["center"], position._data[i]["radius"], position._data[i]["mod"], \
+                answer = self.draw_circle(position._data[i]["center"], position._data[i]["radius"], position._data[i]["mod"], \
                                position._data[i]["color"], f"circle_{i}")
 
             elif position._data[i]["type"] == "circle_bunch":
-                self.draw_circle_bunch(position._data[i]["center"], position._data[i]["min_radius"], position._data[i]["max_radius"], \
+                answer = self.draw_circle_bunch(position._data[i]["center"], position._data[i]["min_radius"], position._data[i]["max_radius"], \
                                 position._data[i]["circle_amount"], position._data[i]["mod"], position._data[i]["color"], f"circle_bunch_{i}")
 
             elif position._data[i]["type"] == "ellipse":
-                self.draw_ellipse(position._data[i]["center"], position._data[i]["x_radius"], position._data[i]["y_radius"], \
+                answer = self.draw_ellipse(position._data[i]["center"], position._data[i]["x_radius"], position._data[i]["y_radius"], \
                                  position._data[i]["mod"], position._data[i]["color"], f"ellipse_{i}")
 
             elif position._data[i]["type"] == "ellipse_bunch":
-                self.draw_ellipse_bunch(position._data[i]["center"], position._data[i]["min_radius_x"], position._data[i]["max_radius_x"], \
+                answer = self.draw_ellipse_bunch(position._data[i]["center"], position._data[i]["min_radius_x"], position._data[i]["max_radius_x"], \
                                         position._data[i]["min_radius_y"], position._data[i]["max_radius_y"], \
                                         position._data[i]["ellipse_amount"], position._data[i]["mod"], position._data[i]["color"], f"ellipse_bunch_{i}")
+
+            if answer is not None:
+                position._data[i]['time_data'] = answer
 
     # lab_03
     def pri_pix(self, x, y, color, tag):
         self.create_polygon([x, y], [x + 1, y], [x + 1, y + 1], [x, y + 1], fill=color, tag=tag)
-
 
     def draw_line(self, a, b, mod, color, tag):
         a_converted = self.vector2canvasCoordinates(a)
@@ -147,14 +153,21 @@ class MyCanvas(Canvas):
         # default
         self.create_line(a_converted.x, a_converted.y, b_converted.x, b_converted.y, fill=color, tag=tag)
 
+    @calculate_time
+    def default_draw_oval(self, *args, **kwargs):
+        return self.create_oval(*args, **kwargs)
+
     def draw_circle(self, center, radius, mod, color, tag):
         center_converted = self.vector2canvasCoordinates(center)
         temp = self.vector2canvasCoordinates(Vector(center.x + radius, center.y))
         r = abs(center_converted - temp)
 
+        x = center_converted.x
+        y = center_converted.y
+
         if radius == 0:
-            self.pri_pix(center.x, center.y, color, tag)
-            return None
+            answer = self.default_draw_oval(x, y, x + 1, y + 1, outline=color, tag=tag)
+            return [(radius, answer[-1])]
 
         functions = [
             canonical_equation_circle,
@@ -163,26 +176,24 @@ class MyCanvas(Canvas):
             middle_dot_circle,
         ]
 
-        x = center_converted.x
-        y = center_converted.y
-
         answer = None
 
         if mod == 0:
             # default
-            self.create_oval(x - r, y - r, x + r, y + r, outline=color, tag=tag)
-
-            return answer
+            answer = self.default_draw_oval(x - r, y - r, x + r, y + r, outline=color, tag=tag)
+            # print(answer[-1])
+            return [(radius, answer[-1])]
 
         elif mod in range(1, 5):
-            data = functions[mod - 1](center_converted, r, color, tag)
+            answer = functions[mod - 1](center_converted, r, color, tag)
+            data = answer[0]
+            # print(answer[1])
 
             if data is not None:
-                for i in range(0, len(data), 3):
-                    for j in range(len(data[0])):
-                        self.pri_pix(data[i][j].x, data[i][j].y, data[i + 1][j], data[i + 2][j])
+                for i in range(len(data[0])):
+                    self.pri_pix(data[0][i].x, data[0][i].y, data[1][0], data[2][i])
 
-            return answer
+            return [(radius, answer[-1])]
 
         else:
             return answer
@@ -209,19 +220,19 @@ class MyCanvas(Canvas):
 
         if mod == 0:
             # default
-            self.create_oval(x - r_x, y - r_y, x + r_x, y + r_y, outline=color, tag=tag)
+            answer = self.default_draw_oval(x - r_x, y - r_y, x + r_x, y + r_y, outline=color, tag=tag)
 
-            return answer
+            return [(x_radius, y_radius, answer[-1])]
 
         elif mod in range(1, 5):
-            data = functions[mod - 1](center_converted, r_x, r_y, color, tag)
+            answer = functions[mod - 1](center_converted, r_x, r_y, color, tag)
+            data = answer[0]
 
             if data is not None:
-                for i in range(0, len(data), 3):
-                    for j in range(len(data[0])):
-                        self.pri_pix(data[i][j].x, data[i][j].y, data[i + 1][j], data[i + 2][j])
+                for i in range(len(data[0])):
+                    self.pri_pix(data[0][i].x, data[0][i].y, data[1][i], data[2][i])
 
-            return answer
+            return [(x_radius, y_radius, answer[-1])]
 
         else:
             return answer
@@ -229,20 +240,30 @@ class MyCanvas(Canvas):
     def draw_circle_bunch(self, center, min_radius, max_radius, circle_amount, mod, color, tag):
         r = min_radius
         dr = (max_radius - min_radius) / (circle_amount - 1)
+        result = []
 
         for i in range(circle_amount):
-            self.draw_circle(center, r, mod, color, tag)
+            answer = self.draw_circle(center, r, mod, color, tag)
+            if answer is not None:
+                result += answer
 
             r += dr
+
+        return None if len(result) == 0 else result
 
     def draw_ellipse_bunch(self, center, min_radius_x, max_radius_x, min_radius_y, max_radius_y, ellipse_amount, mod, color, tag):
         rx = min_radius_x
         drx = (max_radius_x - min_radius_x) / (ellipse_amount - 1)
         ry = min_radius_y
         dry = (max_radius_y - min_radius_y) / (ellipse_amount - 1)
+        result = []
 
         for i in range(ellipse_amount):
-            self.draw_ellipse(center, rx, ry, mod, color, tag)
+            answer = self.draw_ellipse(center, rx, ry, mod, color, tag)
+            if answer is not None:
+                result += answer
 
             rx += drx
             ry += dry
+
+        return None if len(result) == 0 else result

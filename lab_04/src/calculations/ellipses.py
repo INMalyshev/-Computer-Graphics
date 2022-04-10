@@ -1,7 +1,9 @@
 import math
 from src.vector import Vector
+from src.utils.decorators import calculate_time
 
 
+@calculate_time
 def canonical_equation_ellipse(center, x_radius, y_radius, outline='darkred', tag='non'):   # gets canvas coordinates
     dots = []
 
@@ -39,6 +41,7 @@ def canonical_equation_ellipse(center, x_radius, y_radius, outline='darkred', ta
     return dots, cols, tags
 
 
+@calculate_time
 def parametric_equation_ellipse(center, x_radius, y_radius, outline='darkred', tag='non'):
     phi = 0.0
     dphi = 1 / abs(max(x_radius, y_radius))
@@ -57,6 +60,7 @@ def parametric_equation_ellipse(center, x_radius, y_radius, outline='darkred', t
     return dots, cols, tags
 
 
+@calculate_time
 def bresenham_ellipse(center, x_radius, y_radius, outline='darkred', tag='non'):
     eps = 2
 
@@ -90,6 +94,7 @@ def bresenham_ellipse(center, x_radius, y_radius, outline='darkred', tag='non'):
     return dots, cols, tags
 
 
+@calculate_time
 def middle_dot_ellipse(center, x_radius, y_radius, outline='darkred', tag='non'):
     dots = []
 

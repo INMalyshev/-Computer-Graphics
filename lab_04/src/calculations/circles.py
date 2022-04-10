@@ -1,7 +1,9 @@
 import math
 from src.vector import Vector
+from src.utils.decorators import calculate_time
 
 
+@calculate_time
 def canonical_equation_circle(center, radius, outline='darkred', tag='non'):   # gets canvas coordinates
     # (X-Xo) + (Y-Yo) = R
     dots = []
@@ -10,15 +12,15 @@ def canonical_equation_circle(center, radius, outline='darkred', tag='non'):   #
     x = 0
 
     while x <= y:
-        dots.append(Vector(x + center.x, y + center.y))
-        dots.append(Vector(x + center.x, -y + center.y))
-        dots.append(Vector(-x + center.x, y + center.y))
-        dots.append(Vector(-x + center.x, -y + center.y))
+        dots.append(center + Vector(x, y))
+        dots.append(center + Vector(x, -y))
+        dots.append(center + Vector(-x, y))
+        dots.append(center + Vector(-x, -y))
 
-        dots.append(Vector(y + center.y, x + center.x))
-        dots.append(Vector(-y + center.y, x + center.x))
-        dots.append(Vector(y + center.y, -x + center.x))
-        dots.append(Vector(-y + center.y, -x + center.x))
+        dots.append(center + Vector(y, x))
+        dots.append(center + Vector(y, -x))
+        dots.append(center + Vector(-y, x))
+        dots.append(center + Vector(-y, -x))
 
         y = math.sqrt(radius * radius - x * x)
         x += 1
@@ -29,6 +31,7 @@ def canonical_equation_circle(center, radius, outline='darkred', tag='non'):   #
     return dots, cols, tags
 
 
+@calculate_time
 def parametric_equation_circle(center, radius, outline='darkred', tag='non'):
     phi = 0.0
     dphi = 1 / abs(radius)
@@ -47,6 +50,7 @@ def parametric_equation_circle(center, radius, outline='darkred', tag='non'):
     return dots, cols, tags
 
 
+@calculate_time
 def bresenham_circle(center, radius, outline='darkred', tag='non'):
     eps = 2
 
@@ -84,6 +88,7 @@ def bresenham_circle(center, radius, outline='darkred', tag='non'):
     return dots, cols, tags
 
 
+@calculate_time
 def middle_dot_circle(center, radius, outline='darkred', tag='non'):
     x = 0
     y = radius

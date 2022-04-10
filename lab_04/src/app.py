@@ -21,6 +21,8 @@ from src.calculations.analitic_geometry import distance
 
 from tkinter.messagebox import showerror
 
+from src.utils.graphs import graph_scatter
+
 
 class App(tkinter.Tk):
     def __init__(self):
@@ -84,8 +86,11 @@ class App(tkinter.Tk):
         self.add_ellipse_bunch_button = MyButton(self, 'add ellipse bunch', self.__handle_add_ellipse_bunch_button)
         self.add_ellipse_bunch_button.pack(fill="both")
 
-        self.add_circle_bunch_button = MyButton(self, 'del with id', self.__handle_del_with_id_button)
-        self.add_circle_bunch_button.pack(fill="both")
+        self.del_with_id_button = MyButton(self, 'del with id', self.__handle_del_with_id_button)
+        self.del_with_id_button.pack(fill="both")
+
+        self.gget_stat_with_id_button = MyButton(self, 'get stat with id', self.__handle_get_stat_with_id_button)
+        self.gget_stat_with_id_button.pack(fill="both")
 
         # Text
 
@@ -153,6 +158,16 @@ class App(tkinter.Tk):
             self._make_record()
             del self.position._data[id]
             self._set_position()
+
+    def __handle_get_stat_with_id_button(self, event=None):
+        new_window = MyDelWithIdForm(self)
+        id = new_window.handle_open()
+
+        if id is None:
+            return
+
+        if id >= 0 and id < len(self.position._data):
+            graph_scatter(self.position._data[id]['time_data'])
 
     def __handle_add_circle_button(self, event=None):
         new_window = MyAddCircleForm(self)
