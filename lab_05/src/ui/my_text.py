@@ -13,7 +13,7 @@ class MyText(Text):
         self.configure(bg=self.settings.ui.text.bg)
         self.configure(state="disabled")
 
-        self.scroll = Scrollbar(command=self.yview)
+        self.scroll = Scrollbar(self, command=self.yview)
         self.scroll.pack(side=RIGHT, fill=Y)
 
         self.config(yscrollcommand=self.scroll.set)

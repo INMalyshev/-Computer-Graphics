@@ -209,7 +209,7 @@ class MyCanvas(Canvas):
         line_width = 2
         figures = figures_original.copy()
         figures.sort(key=lambda x: x['erase'])
-        canvas_matrix = [[False for _ in range(self.winfo_height())] for _ in range(self.winfo_width())]
+        canvas_matrix = [[None for _ in range(self.winfo_height())] for _ in range(self.winfo_width())]
 
         for figure in figures:
             if figure['finished']:
@@ -224,11 +224,11 @@ class MyCanvas(Canvas):
                 self.update()
             for x in range(self.winfo_width()):
                 if canvas_matrix[x][y]:
-                    self.pri_pix(x, y, fill=self.fill_color)
+                    self.pri_pix(x, y, fill=canvas_matrix[x][y])
 
     def draw_figure(self, figure, matrix):
         # canvas_matrix = [[False for _ in range(len(matrix))] for _ in range(len(matrix[0]))]
-        canvas_matrix = [[False for _ in range(self.winfo_height())] for _ in range(self.winfo_width())]
+        canvas_matrix = [[None for _ in range(self.winfo_height())] for _ in range(self.winfo_width())]
 
         figure_dots = figure['dots']
 
@@ -262,11 +262,13 @@ class MyCanvas(Canvas):
                     for dx in range(0, min(int(cr) - x, self.winfo_width() - x)):
                         if 0 < x + dx >= len(canvas_matrix) or 0 < y >= len(canvas_matrix[0]):
                             break
-                        canvas_matrix[x + dx][y] = not canvas_matrix[x + dx][y]
+                        # canvas_matrix[x + dx][y] = not canvas_matrix[x + dx][y]
+                        canvas_matrix[x + dx][y] = figure['color'] if canvas_matrix[x + dx][y] is None else None
 
         for xi in range(len(matrix)):
             for yi in range(len(matrix[0])):
                 if figure['erase']:
-                    matrix[xi][yi] = False if canvas_matrix[xi][yi] else matrix[xi][yi]
+                    matrix[xi][yi] = False if canvas_matrix[xi][yi] is not None else matrix[xi][yi]
                 else:
-                    matrix[xi][yi] = max(canvas_matrix[xi][yi], matrix[xi][yi])
+                    # matrix[xi][yi] = max(canvas_matrix[xi][yi], matrix[xi][yi])
+                    matrix[xi][yi] = canvas_matrix[xi][yi] if canvas_matrix[xi][yi] is not None else matrix[xi][yi]
