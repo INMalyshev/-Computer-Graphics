@@ -17,7 +17,9 @@ from src.calculations.lines import line
 class MyCanvas(Canvas):
     def __init__(self, parent):
         self.settings = Settings()
+
         self.bg_color = self.settings.ui.canvas.bg
+        self.fill_color = 'pink'
 
         super(MyCanvas, self).__init__(
             parent,
@@ -184,7 +186,10 @@ class MyCanvas(Canvas):
         self.configure(bg=color)
         self.bg_color = color
 
-    def _set_position(self, position):
+    def change_fill_color(self, color):
+        self.fill_color = color
+
+    def _set_position(self, position, animated=False):
         self.delete("all")
         self.draw_cross()
 
@@ -193,38 +198,37 @@ class MyCanvas(Canvas):
 
         line_width = 2
 
-        # for i in range(len(position._data)):
-        #     if len(position._data[i]['dots']) > 1:
-        #         if position._data[i]['finished']:
-        #             figure = position._data[i]
-        #             self.draw_figure(figure)
-        #
-        #             continue
-        #
-        #         for j in range(len(position._data[i]['dots']) - 1):
-        #             self.draw_line(position._data[i]['dots'][j], position._data[i]['dots'][j+1], fill='red', width=line_width)
-
-        self.draw_figures(position._data)
+        self.draw_figures(position._data, animated)
 
         if len(position._data) > 0:
             if not position._data[-1]['finished']:
                 for j in range(len(position._data[-1]['dots']) - 1):
                     self.draw_line(position._data[-1]['dots'][j], position._data[-1]['dots'][j+1], fill='red', width=line_width)
 
-    def draw_figures(self, figures):
+    def draw_figures(self, figures_original, animated=False):
+        line_width = 2
+        figures = figures_original.copy()
+        figures.sort(key=lambda x: x['erase'])
         canvas_matrix = [[False for _ in range(self.winfo_height())] for _ in range(self.winfo_width())]
 
         for figure in figures:
             if figure['finished']:
                 self.draw_figure(figure, canvas_matrix)
 
+                if figure['erase'] == 1:
+                    for i in range(-1, len(figure['dots']) - 1):
+                        self.draw_line(figure['dots'][i], figure['dots'][i + 1], fill='red', width=line_width)
+
         for y in range(self.winfo_height()):
+            if animated:
+                self.update()
             for x in range(self.winfo_width()):
                 if canvas_matrix[x][y]:
-                    self.pri_pix(x, y, fill='pink')
+                    self.pri_pix(x, y, fill=self.fill_color)
 
     def draw_figure(self, figure, matrix):
-        canvas_matrix = [[False for _ in range(len(matrix))] for _ in range(len(matrix[0]))]
+        # canvas_matrix = [[False for _ in range(len(matrix))] for _ in range(len(matrix[0]))]
+        canvas_matrix = [[False for _ in range(self.winfo_height())] for _ in range(self.winfo_width())]
 
         figure_dots = figure['dots']
 
@@ -262,45 +266,7 @@ class MyCanvas(Canvas):
 
         for xi in range(len(matrix)):
             for yi in range(len(matrix[0])):
-                matrix[xi][yi] = max(canvas_matrix[xi][yi], matrix[xi][yi])
-
-    # def draw_figure(self, figure):
-    #     figure_dots = figure['dots']
-    #
-    #     right = figure_dots[0].x
-    #
-    #     field = Field(Vector(0, 0), Vector(self.winfo_width(), self.winfo_height()))
-    #
-    #     for fd in figure_dots:
-    #         right = max(right, fd.x)
-    #
-    #     cr = self.distance2canvasDistance(right - self.field.start.x)
-    #
-    #     canvas_matrix = [[False for _ in range(self.winfo_height())] for _ in range(self.winfo_width())]
-    #     figure_sides = [(figure_dots[i], figure_dots[i + 1]) for i in range(-1, len(figure_dots) - 1, 1)]
-    #     for fs in figure_sides:
-    #         start = self.vector2canvasCoordinates(fs[0])
-    #         finish = self.vector2canvasCoordinates(fs[1])
-    #
-    #         x_arr, y_arr = line(start, finish)
-    #
-    #         if y_arr[-1] > y_arr[0]:
-    #             y_arr.reverse()
-    #             x_arr.reverse()
-    #
-    #         for i in range(1, len(x_arr), 1):
-    #             x, y = int(x_arr[i]), int(y_arr[i])
-    #
-    #             if field.start.y <= y <= field.finish.y:
-    #                 if x < 0:
-    #                     x = 0
-    #
-    #                 for dx in range(0, min(int(cr) - x, self.winfo_width() - x)):
-    #                     if 0 < x + dx >= len(canvas_matrix) or 0 < y >= len(canvas_matrix[0]):
-    #                         break
-    #                     canvas_matrix[x + dx][y] = not canvas_matrix[x + dx][y]
-    #
-    #     for y in range(self.winfo_height()):
-    #         for x in range(self.winfo_width()):
-    #             if canvas_matrix[x][y]:
-    #                 self.pri_pix(x, y, fill='pink')
+                if figure['erase']:
+                    matrix[xi][yi] = False if canvas_matrix[xi][yi] else matrix[xi][yi]
+                else:
+                    matrix[xi][yi] = max(canvas_matrix[xi][yi], matrix[xi][yi])

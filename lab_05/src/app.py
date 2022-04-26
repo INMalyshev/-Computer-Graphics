@@ -19,6 +19,9 @@ from tkinter.messagebox import showerror
 
 from src.utils.graphs import graph_scatter
 
+from tkinter import IntVar
+from tkinter import Radiobutton
+
 
 class App(tkinter.Tk):
     def __init__(self):
@@ -67,14 +70,25 @@ class App(tkinter.Tk):
         # Настройки канвы
 
         self.canvas = MyCanvas(self)
-        self.canvas.pack(fill="both", expand=True)
+        # self.canvas.pack(fill="both", expand=True)
+        self.canvas.place(relx=0, rely=0, relheight=1.0, relwidth=0.8)
 
         # Кнопки
+        self.process_button = MyButton(self, 'process', self.___start_make_figure_process)
+        self.process_button.place(relx=0.8, rely=0, relheight=0.1, relwidth=0.2)
 
-        # self.del_with_id_button = MyButton(self, 'del with id', self.__handle_del_with_id_button)
-        # self.del_with_id_button.pack(fill="both")
-        self.del_with_id_button = MyButton(self, 'process', self.___start_make_figure_process)
-        self.del_with_id_button.pack(fill="both")
+        self.slowly_button = MyButton(self, 'draw scene slowly', lambda: self._set_position(animated=True))
+        self.slowly_button.place(relx=0.8, rely=0.1, relheight=0.1, relwidth=0.2)
+
+        self.fill_mod = IntVar()
+        self.fill_mod.set(0)
+        self.filling_mod = Radiobutton(self, text="fill", variable=self.fill_mod, value=0)
+        self.erasing_mod = Radiobutton(self, text="erase", variable=self.fill_mod, value=1)
+        self.filling_mod.place(relx=0.8, rely=0.2, relheight=0.05, relwidth=0.1)
+        self.erasing_mod.place(relx=0.9, rely=0.2, relheight=0.05, relwidth=0.1)
+
+        self.del_with_id_button = MyButton(self, 'del with id', self.__handle_del_with_id_button)
+        self.del_with_id_button.place(relx=0.8, rely=0.3, relheight=0.1, relwidth=0.2)
 
         # Text
 
@@ -86,8 +100,8 @@ class App(tkinter.Tk):
     def start(self):
         self.mainloop()
 
-    def _set_position(self):
-        self.canvas._set_position(self.position)
+    def _set_position(self, animated=False):
+        self.canvas._set_position(self.position, animated)
         # self.text_list.set_text(self.___gen_text())
 
     def _handle_zoom(self, event):
@@ -143,6 +157,10 @@ class App(tkinter.Tk):
             self._set_position()
 
     def ___start_make_figure_process(self, event=None):
+        if self.position._data:
+            if not self.position._data[-1]['finished']:
+                del self.position._data[-1]
+
         binds = []
         line_width = 2
 
@@ -172,11 +190,14 @@ class App(tkinter.Tk):
         def create_prompt_line(self, event):
             if len(self.position._data[-1]['dots']) > 0:
                 self._set_position()
+                # self.canvas.delete('to_del')
 
                 on_canvas = Vector(event.x, event.y)
                 on_real = self.canvas.canvasCoordinates2vector(on_canvas)
                 last_dot = self.position._data[-1]['dots'][-1]
                 self.canvas.draw_line(last_dot, on_real, fill='red', width=line_width)
+                # self.canvas.draw_line(last_dot, on_real, fill='red', width=line_width, tag='to_del')
+
 
         def create_perpendicular_prompt_line(self, event):
             if len(self.position._data[-1]['dots']) > 0:
@@ -211,6 +232,8 @@ class App(tkinter.Tk):
         new_figure = {
             'dots': [],
             'finished': False,
+            'erase': self.fill_mod.get() == 1,
+            'color': self.canvas.fill_color,
         }
 
         self._make_record()
