@@ -31,7 +31,6 @@ from tkinter import Entry
 from tkinter import Radiobutton
 
 
-
 class LabApp(App):
     def __init__(self):
         super(LabApp, self).__init__()
@@ -42,6 +41,7 @@ class LabApp(App):
         self.inner_index = 0
         self.hand_mod = False
         self.fill_color = 'pink'
+        self.init_coordinate = Vector(0, 0)
 
         # Настройки канвы
 
@@ -88,6 +88,9 @@ class LabApp(App):
         self.add_dot_button = MyButton(self, 'add dot', self._handle_add_dot_button)
         self.add_dot_button.place(relx=0.8, rely=0.65, relheight=0.05, relwidth=0.2)
 
+        self.change_center_button = MyButton(self, 'change center', self._handle_set_center_button)
+        self.change_center_button.place(relx=0.8, rely=0.7, relheight=0.05, relwidth=0.2)
+
         # Text
 
         self.text_list = MyText(self)
@@ -102,7 +105,7 @@ class LabApp(App):
         if self.inner_index < 4:
             return
 
-        print(self.inner_index)
+        # print(self.inner_index)
 
         if not only_text:
             self.canvas.set_position(self.position.data, **kwargs)
@@ -152,6 +155,7 @@ class LabApp(App):
             'fill': self.canvas.fill_color,
             'type': 'polygon',
             'dots': [],
+            'init_coordinate': self.init_coordinate,
         }
 
         self._make_record()
@@ -177,18 +181,11 @@ class LabApp(App):
             self.position.data[-1].finished = True
             self.set_position(tag=tag)
 
-    def _handle_add_dot_button(self, event=None):
-        if self.hand_mod:
-            return
-
+    def _get_vector_from_entries(self):
         str_x = self.text_x.get()
         str_y = self.text_y.get()
         self.text_x.set('')
         self.text_y.set('')
-
-        if self.position.data:
-            if self.position.data[-1].finished:
-                return
 
         x, y = None, None
 
@@ -198,7 +195,7 @@ class LabApp(App):
             if len(str_x) > 0:
                 showerror('x error', 'x not a float number')
 
-            return
+            return None
 
         try:
             y = float(str_y)
@@ -206,15 +203,37 @@ class LabApp(App):
             if len(str_y) > 0:
                 showerror('y error', 'y not a float number')
 
+            return None
+
+        return Vector(x, y)
+
+    def _handle_add_dot_button(self, event=None):
+        if self.hand_mod:
             return
 
-        dot = Vector(x, y)
+        if self.position.data:
+            if self.position.data[-1].finished:
+                return
+
+        dot = self._get_vector_from_entries()
 
         if self.position.data:
             tag = self.position.data[-1].tag
             self.position.data[-1].dots.append(dot)
 
             self.set_position(tag=tag)
+
+    def _handle_set_center_button(self, event=None):
+        if self.hand_mod:
+            return
+
+        if self.position.data:
+            if not self.position.data[-1].finished:
+                return
+
+        dot = self._get_vector_from_entries()
+
+        self.init_coordinate = dot
 
     def _start_make_figure_process(self, event=None):
         if self.position.data:
@@ -303,6 +322,7 @@ class LabApp(App):
             'fill': self.canvas.fill_color,
             'type': 'polygon',
             'dots': [],
+            'init_coordinate': self.init_coordinate,
         }
 
         self._make_record()

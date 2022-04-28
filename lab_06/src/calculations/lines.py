@@ -86,3 +86,50 @@ def line(start, finish):
     return x_arr, y_arr
 
 
+def line2(start, finish):
+    if isinstance(start, Vector) and isinstance(finish, Vector):
+        x0, x1 = start.x, finish.x
+        y0, y1 = start.y, finish.y
+
+        delta_x = abs(x1 - x0)
+        delta_y = abs(y1 - y0)
+
+        error = 0.0
+
+        dir_y = 1 if y1 - y0 > 0 else -1
+        dir_x = 1 if x1 - x0 > 0 else -1
+
+        x_arr = []
+        y_arr = []
+
+        if abs(x1 - x0) > abs(y1 - y0):
+            delta_err = (delta_y + 1)
+            y = y0
+
+            for x in range(floor(x0), ceil(x1) + 1, dir_x):
+                x_arr.append(x)
+                y_arr.append(y)
+
+                error = error + delta_err
+                if error >= (delta_x + 1):
+                    y += dir_y
+                    error = error - (delta_x + 1)
+        else:
+            delta_err = (delta_x + 1)
+            x = x0
+
+            for y in range(floor(y0), ceil(y1) + 1, dir_y):
+                x_arr.append(x)
+                y_arr.append(y)
+
+                error = error + delta_err
+                if error >= (delta_y + 1):
+                    x += dir_x
+                    error = error - (delta_y + 1)
+
+        return x_arr, y_arr
+
+    else:
+        print('---> something wrong with __int_bresenham_line method')
+        return None
+
