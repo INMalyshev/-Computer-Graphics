@@ -1,6 +1,7 @@
 from src.calculations.lines import line, line1, line2
 from src.vector import Vector
 from math import floor, ceil
+from src.utils.decorators import calculate_time
 
 
 class Figure:
@@ -15,11 +16,15 @@ class Figure:
         self.type = 'None' if 'type' not in kwargs else kwargs['type']
         self.init_coordinate = Vector(0, 0) if 'init_coordinate' not in kwargs else kwargs['init_coordinate']
         self.circuit_color = self.canvas.line_color if 'circuit_color' not in kwargs else kwargs['circuit_color']
+        self.last_time = 0
 
     def merge_and_draw(self, **kwargs):
         # self.along_ribs(**kwargs)
-        self.line_seeding(**kwargs)
+        answer = self.line_seeding(**kwargs)
+        self.last_time = answer[-1]
+        print(answer[-1])
 
+    @calculate_time
     def line_seeding(self, **kwargs):
         step_by_step = False if 'step_by_step' not in kwargs else kwargs['step_by_step']
         # step_by_step = True
@@ -47,6 +52,12 @@ class Figure:
                 for i in range(3):
                     for j in range(3):
                         matrix[x+i][y+j] = self.circuit_color
+
+                        if step_by_step or self.erase:
+                            self.canvas.pri_pix(x + i, y + j, fill=self.circuit_color, tag=self.tag)
+
+        if step_by_step:
+            self.canvas.update()
 
         x_max = len(matrix)
         x_min = 0
@@ -117,7 +128,7 @@ class Figure:
         for xi in range(len(matrix)):
             for yi in range(len(matrix[0])):
                 if self.erase:
-                    color = self.canvas.bg_color if matrix[xi][yi] is not None else self.canvas.matrix[xi][yi]
+                    color = self.canvas.bg_color if matrix[xi][yi] is not None and matrix[xi][yi] != self.circuit_color else self.canvas.matrix[xi][yi]
                     self.canvas.matrix[xi][yi] = color
                 else:
                     color = matrix[xi][yi] if matrix[xi][yi] is not None else self.canvas.matrix[xi][yi]

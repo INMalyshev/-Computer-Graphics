@@ -150,7 +150,7 @@ class LabApp(App):
 
         new_figure = {
             'finished': False,
-            'tag': str(self.inner_index),
+            'tag': 'tag' + str(self.inner_index),
             'erase': self.fill_mod.get() == 1,
             'fill': self.canvas.fill_color,
             'type': 'polygon',
@@ -317,7 +317,7 @@ class LabApp(App):
 
         new_figure = {
             'finished': False,
-            'tag': str(self.inner_index),
+            'tag': 'tag' + str(self.inner_index),
             'erase': self.fill_mod.get() == 1,
             'fill': self.canvas.fill_color,
             'type': 'polygon',
