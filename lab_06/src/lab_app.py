@@ -49,29 +49,29 @@ class LabApp(App):
         self.canvas.place(relx=0, rely=0, relheight=1.0, relwidth=0.8)
 
         # Кнопки
-        self.process_button = MyButton(self, 'make with hands', self._start_make_figure_process)
+        self.process_button = MyButton(self, 'Задать отрезок руками', self._start_make_figure_process)
         self.process_button.place(relx=0.8, rely=0, relheight=0.05, relwidth=0.2)
 
-        self.slowly_button = MyButton(self, 'draw scene slowly', lambda: self.set_position(step_by_step=True))
+        self.slowly_button = MyButton(self, 'Медленно отрисовать сцену', lambda: self.set_position(step_by_step=True))
         self.slowly_button.place(relx=0.8, rely=0.05, relheight=0.05, relwidth=0.2)
 
         self.fill_mod = IntVar()
         self.fill_mod.set(0)
-        self.filling_mod = Radiobutton(self, text="fill", variable=self.fill_mod, value=0)
-        self.erasing_mod = Radiobutton(self, text="erase", variable=self.fill_mod, value=1)
+        self.filling_mod = Radiobutton(self, text="Заполнение", variable=self.fill_mod, value=0)
+        self.erasing_mod = Radiobutton(self, text="Вырезание", variable=self.fill_mod, value=1)
         self.filling_mod.place(relx=0.8, rely=0.1, relheight=0.05, relwidth=0.1)
         self.erasing_mod.place(relx=0.9, rely=0.1, relheight=0.05, relwidth=0.1)
 
-        self.del_with_id_button = MyButton(self, 'del with id', self._handle_del_with_id_button)
+        self.del_with_id_button = MyButton(self, 'Удалить по индексу', self._handle_del_with_id_button)
         self.del_with_id_button.place(relx=0.8, rely=0.15, relheight=0.05, relwidth=0.2)
 
-        self.change_color_button = MyButton(self, 'change fill fill', self._handle_choose_fill_color_button)
+        self.change_color_button = MyButton(self, 'Изменить цвет заполнения', self._handle_choose_fill_color_button)
         self.change_color_button.place(relx=0.8, rely=0.2, relheight=0.05, relwidth=0.2)
 
-        self.new_figure_button = MyButton(self, 'new figure', self._handle_new_figure_button)
+        self.new_figure_button = MyButton(self, 'Добавить фигуру', self._handle_new_figure_button)
         self.new_figure_button.place(relx=0.8, rely=0.45, relheight=0.05, relwidth=0.2)
 
-        self.finish_figure_button = MyButton(self, 'finish figure', self._handle_finish_figure_button)
+        self.finish_figure_button = MyButton(self, 'Завершить фигуру', self._handle_finish_figure_button)
         self.finish_figure_button.place(relx=0.8, rely=0.5, relheight=0.05, relwidth=0.2)
 
         self.text_x = StringVar()
@@ -85,10 +85,10 @@ class LabApp(App):
         self.y_entry = Entry(self, textvariable=self.text_y)
         self.y_entry.place(relx=0.85, rely=0.6, relheight=0.05, relwidth=0.15)
 
-        self.add_dot_button = MyButton(self, 'add dot', self._handle_add_dot_button)
+        self.add_dot_button = MyButton(self, 'Добавить точку', self._handle_add_dot_button)
         self.add_dot_button.place(relx=0.8, rely=0.65, relheight=0.05, relwidth=0.2)
 
-        self.change_center_button = MyButton(self, 'change center', self._handle_set_center_button)
+        self.change_center_button = MyButton(self, 'Изменить затравочные координаты', self._handle_set_center_button)
         self.change_center_button.place(relx=0.8, rely=0.7, relheight=0.05, relwidth=0.2)
 
         # Text

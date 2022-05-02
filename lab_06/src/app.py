@@ -47,14 +47,14 @@ class App(tkinter.Tk):
         # Подключение и настройка меню
 
         self.menu = MyMenu(self)
-        self.menu.filemenu.add_command(label="background fill", command=self._handle_choose_bg_color_button)
-        self.menu.filemenu.add_command(label="fill fill", command=self._handle_choose_fill_color_button)
-        self.menu.filemenu.add_command(label="rewind", command=self._rewind)
+        self.menu.filemenu.add_command(label="Изменить цвет фона", command=self._handle_choose_bg_color_button)
+        self.menu.filemenu.add_command(label="Изменить цвет заполнения", command=self._handle_choose_fill_color_button)
+        self.menu.filemenu.add_command(label="Сбросить", command=self._rewind)
         self.menu.filemenu.add_separator()
-        self.menu.filemenu.add_command(label="forward", command=self._forward)
-        self.menu.filemenu.add_command(label="backward", command=self._backward)
+        self.menu.filemenu.add_command(label="Откатить на шаг вперед", command=self._forward)
+        self.menu.filemenu.add_command(label="Откатить на шаг назад", command=self._backward)
         self.menu.filemenu.add_separator()
-        self.menu.filemenu.add_command(label="exit", command=self.quit)
+        self.menu.filemenu.add_command(label="Выход", command=self.quit)
 
         self.config(menu=self.menu)
 
