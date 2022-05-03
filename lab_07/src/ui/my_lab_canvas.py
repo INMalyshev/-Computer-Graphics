@@ -11,7 +11,7 @@ class MyLabCanvas(MyCanvas):
         self.line_color = parent.line_color
         self.circuit_color = parent.circuit_color
 
-        self.cutter = None
+        self.cutter = Field(Vector(-20, -20), Vector(20, 20))
 
     def change_cutter(self, cutter):
         self.cutter = cutter
@@ -42,7 +42,7 @@ class MyLabCanvas(MyCanvas):
         tag = None if 'tag' not in kwargs else kwargs['tag']
 
         if tag is not None:
-            print('with tag')
+            # print('with tag')
 
             self.delete(tag)
             for fig in data:

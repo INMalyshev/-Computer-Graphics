@@ -19,16 +19,21 @@ class Figure:
         self.last_time = 0
 
     def merge_and_draw(self, **kwargs):
-        # self.along_ribs(**kwargs)
-        # answer = self.line_seeding(**kwargs)
-        # self.last_time = answer[-1]
-        # print(answer[-1])
         self.lines_with_cutter(**kwargs)
 
     def lines_with_cutter(self, **kwargs):
         if self.finished:
+            eps = 1e-6
+
             a = self.dots[0]
             b = self.dots[1]
+
+            print('a: ', a)
+            print('b: ', b)
+
+            r0, r1 = None, None
+            q = None
+            i = None
 
             kwgs = {
                 'fill': self.fill,
@@ -36,186 +41,177 @@ class Figure:
                 'width': self.canvas.line_width,
             }
 
-            self.canvas.draw_line(a, b, **kwgs)
+            if self.canvas.cutter is None:
+                print('no cutter - skip')
+                self.canvas.draw_line(a, b, **kwgs)
 
-    @calculate_time
-    def line_seeding(self, **kwargs):
-        step_by_step = False if 'step_by_step' not in kwargs else kwargs['step_by_step']
-        # step_by_step = True
+                return
 
-        if not self.finished:
-            figure_sides = [[self.dots[i], self.dots[i+1]] for i in range(len(self.dots) - 1)]
-            for side in figure_sides:
-                self.canvas.draw_line(side[0], side[1], fill=self.canvas.line_color, tag=self.tag, width=self.canvas.line_width)
+            x_left, y_bottom = self.canvas.cutter.start.x, self.canvas.cutter.start.y
+            x_right, y_top = self.canvas.cutter.finish.x, self.canvas.cutter.finish.y
 
-            return
+            print('x_left', x_left)
+            print('x_right', x_right)
+            print('y_bottom', y_bottom)
+            print('y_top', y_top)
 
-        canvas_pixel = self.canvas.vector2canvasCoordinates(self.init_coordinate)
 
-        stack = [canvas_pixel]
-        matrix = [[None for _ in range(self.canvas.winfo_height())] for _ in range(self.canvas.winfo_width())]
-        figure_sides = [(self.dots[i], self.dots[i + 1]) for i in range(-1, len(self.dots) - 1, 1)]
+            x0, y0 = a.x, a.y
+            x1, y1 = b.x, b.y
 
-        for fs in figure_sides:
-            start = self.canvas.vector2canvasCoordinates(fs[0])
-            finish = self.canvas.vector2canvasCoordinates(fs[1])
+            t0 = [x0 < x_left, x0 > x_right, y0 < y_bottom, y0 > y_top]
+            print(t0)
+            t1 = [x1 < x_left, x1 > x_right, y1 < y_bottom, y1 > y_top]
+            print(t1)
 
-            x_arr, y_arr = line2(start, finish)
-            for x, y in zip(map(int, x_arr), map(int, y_arr)):
-                # matrix[x][y] = self.circuit_color
-                for i in range(3):
-                    for j in range(3):
-                        matrix[x+i][y+j] = self.circuit_color
+            s0 = bool(sum(t0))
+            s1 = bool(sum(t1))
 
-                        if step_by_step or self.erase:
-                            self.canvas.pri_pix(x + i, y + j, fill=self.circuit_color, tag=self.tag)
+            print('s0: ', s0, '\ns1: ', s1)
 
-        if step_by_step:
-            self.canvas.update()
+            pr = True
+            m = 1e30
 
-        x_max = len(matrix)
-        x_min = 0
-        y_max = len(matrix[0])
-        y_min = 0
+            if not (s0 or s1):
+                print('both sides in cutter')
 
-        while stack:
-            # print('stack len', len(stack))
-            canvas_pixel = stack.pop()
+                r0 = Vector(x0, y0)
+                r1 = Vector(x1, y1)
 
-            x, y = int(canvas_pixel.x), int(canvas_pixel.y)
-            if matrix[x][y] == self.fill:
-                continue
+                self.canvas.draw_line(r0, r1, **kwgs)
 
-            while x < x_max and matrix[x][y] != self.circuit_color:
-                matrix[x][y] = self.fill
+                return
 
-                if step_by_step:
-                    if self.erase:
-                        color = self.canvas.bg_color if matrix[x][y] == self.fill else self.canvas.matrix[x][y]
+            # p = bool(sum([t0[i] * t1[i] for i in range(4)]))
+            # if not p:
+            #     print('p - 0 => pr = False')
+            #     pr = False
+            #
+            #     return
+
+            if not s0:
+                print('s0 visible')
+
+                r0 = a
+                q = b
+                i = 2
+
+            if not s1:
+                print('s1 visible')
+
+                r0 = b
+                q = a
+                # a, b = b, a
+                i = 2
+
+            if i is None:
+                print('both sides not visible')
+
+                i = 0
+
+            while i <= 2:
+                print('------------------------------------------')
+                i += 1
+
+                if q is None:
+                    if i == 1:
+                        print('q = a')
+                        q = a
                     else:
-                        color = matrix[x][y] if matrix[x][y] is not None else self.canvas.matrix[x][y]
+                        print('q = b')
+                        q = b
 
-                    self.canvas.pri_pix(x, y, fill=color, tag=self.tag)
+                # i += 1
 
-                if x == x_max - 1 or matrix[x + 1][y] == self.circuit_color:
-                    if y < y_max - 1:
-                        if matrix[x][y + 1] not in [self.fill, self.circuit_color]:
-                            stack.append(Vector(x, y + 1))
-                    if y > y_min:
-                        if matrix[x][y - 1] not in [self.fill, self.circuit_color]:
-                            stack.append(Vector(x, y - 1))
+                if a.x == b.x:
+                    if abs(m) < eps:
+                        print('ort1')
 
-                else:
-                    if y < y_max - 1:
-                        if matrix[x + 1][y + 1] == self.circuit_color:
-                            stack.append(Vector(x, y + 1))
-                    if y > y_min:
-                        if matrix[x + 1][y - 1] == self.circuit_color:
-                            stack.append(Vector(x, y - 1))
+                        continue
 
-                x += 1
+                if a.x != b.x:
+                    m = (y1 - y0) / (x1 - x0)
 
-            x, y = int(canvas_pixel.x) - 1, int(canvas_pixel.y)
-            while x >= x_min and matrix[x][y] != self.circuit_color:
-                matrix[x][y] = self.fill
+                if q.x > x_left:
+                    if q.x < x_right:
+                        if abs(m) < eps:
+                            print('idk')
+                            continue
 
-                if step_by_step:
-                    if self.erase:
-                        color = self.canvas.bg_color if matrix[x][y] == self.fill else self.canvas.matrix[x][y]
-                    else:
-                        color = matrix[x][y] if matrix[x][y] is not None else self.canvas.matrix[x][y]
+                y_p = m * (x_left - q.x) + q.y
 
-                    self.canvas.pri_pix(x, y, fill=color, tag=self.tag)
+                if y_bottom <= y_p <= y_top and q.x <= x_left:
+                    print('приклеиваю к левой стороне')
+                    if r0 is None:
+                        r0 = Vector(x_left, y_p)
+                    elif r1 is None:
+                        r1 = Vector(x_left, y_p)
+                    q = None
 
-                if y < y_max - 1:
-                    if matrix[x + 1][y + 1] == self.circuit_color and matrix[x][y + 1] not in [self.fill, self.circuit_color]:
-                        stack.append(Vector(x, y + 1))
-                if y > y_min:
-                    if matrix[x + 1][y - 1] == self.circuit_color and matrix[x][y - 1] not in [self.fill, self.circuit_color]:
-                        stack.append(Vector(x, y - 1))
+                    continue
 
-                x -= 1
+                if q.x < x_right:
+                    if abs(m) < eps:
+                        continue
 
-            if step_by_step:
-                self.canvas.update()
+                y_p = m * (x_right - q.x) + q.y
 
-        for xi in range(len(matrix)):
-            for yi in range(len(matrix[0])):
-                if self.erase:
-                    color = self.canvas.bg_color if matrix[xi][yi] is not None and matrix[xi][yi] != self.circuit_color else self.canvas.matrix[xi][yi]
-                    self.canvas.matrix[xi][yi] = color
-                else:
-                    color = matrix[xi][yi] if matrix[xi][yi] is not None else self.canvas.matrix[xi][yi]
-                    self.canvas.matrix[xi][yi] = color
+                if y_bottom <= y_p <= y_top and q.x >= x_right:
+                    print('приклеиваю к правой стороне')
 
-                if color is not None and not step_by_step:
-                    self.canvas.pri_pix(xi, yi, fill=color, tag=self.tag)
+                    if r0 is None:
+                        r0 = Vector(x_right, y_p)
+                    elif r1 is None:
+                        r1 = Vector(x_right, y_p)
+                    q = None
 
-    def along_ribs(self, **kwargs):
-        step_by_step = False if 'step_by_step' not in kwargs else kwargs['step_by_step']
-        # step_by_step = True
+                    continue
 
-        if not self.finished:
-            figure_sides = [[self.dots[i], self.dots[i+1]] for i in range(len(self.dots) - 1)]
-            for side in figure_sides:
-                self.canvas.draw_line(side[0], side[1], fill=self.canvas.line_color, tag=self.tag, width=self.canvas.line_width)
+                if abs(m) < eps:
+                    continue
 
-            return
+                if q.y < y_top:
+                    if q.y > y_bottom:
+                        print('pr - False')
 
-        matrix = [[None for _ in range(self.canvas.winfo_height())] for _ in range(self.canvas.winfo_width())]
+                        pr = False
 
-        right = self.dots[0].x
+                x_p = (y_top - q.y) / m + q.x
 
-        for fd in self.dots:
-            right = max(right, fd.x)
+                if x_left <= x_p <= x_right and q.y >= y_top:
+                    print('приклеиваю к верхней стороне')
 
-        cr = self.canvas.distance2canvasDistance(right - self.canvas.field.start.x)
+                    if r0 is None:
+                        r0 = Vector(x_p, y_top)
+                    elif r1 is None:
+                        r1 = Vector(x_p, y_top)
+                    q = None
 
-        figure_sides = [(self.dots[i], self.dots[i + 1]) for i in range(-1, len(self.dots) - 1, 1)]
+                    continue
 
-        for fs in figure_sides:
-            start = self.canvas.vector2canvasCoordinates(fs[0])
-            finish = self.canvas.vector2canvasCoordinates(fs[1])
+                if q.y > y_bottom:
+                    print('pr - False')
+                    pr = False
 
-            x_arr, y_arr = line(start, finish)
+                x_p = (y_bottom - q.y) / m + q.x
 
-            if y_arr[-1] > y_arr[0]:
-                y_arr.reverse()
-                x_arr.reverse()
+                print('???', x_left, x_p, x_right)
 
-            for i in range(1, len(x_arr), 1):
-                x, y = int(x_arr[i]), int(y_arr[i])
+                if x_left <= x_p <= x_right and q.y <= y_bottom:
+                    print('приклеиваю к нижней стороне')
 
-                if 0 <= y < self.canvas.winfo_height():
-                    if x < 0:
-                        x = 0
+                    if r0 is None:
+                        r0 = Vector(x_p, y_bottom)
+                    elif r1 is None:
+                        r1 = Vector(x_p, y_bottom)
+                    q = None
 
-                    for dx in range(0, min(int(cr) - x, self.canvas.winfo_width() - x)):
-                        if 0 < x + dx >= len(matrix) or 0 < y >= len(matrix[0]):
-                            break
+                    continue
 
-                        color = self.fill if matrix[x + dx][y] is None else None
-                        matrix[x + dx][y] = color
+                pr = False
 
-                        if step_by_step:
-                            color = self.canvas.bg_color if color is not None and self.erase else color if color is not None else self.canvas.bg_color
-                            if color is not None:
-                                self.canvas.pri_pix(x + dx, y, fill=color, tag=self.tag)
+            self.canvas.draw_line(a, b, **kwgs, dash=(1, 10))
 
-                    if step_by_step:
-                        self.canvas.update()
-
-        for xi in range(len(matrix)):
-            for yi in range(len(matrix[0])):
-                if self.erase:
-                    color = self.canvas.bg_color if matrix[xi][yi] is not None else self.canvas.matrix[xi][yi]
-                    self.canvas.matrix[xi][yi] = color
-                else:
-                    color = matrix[xi][yi] if matrix[xi][yi] is not None else self.canvas.matrix[xi][yi]
-                    self.canvas.matrix[xi][yi] = color
-
-                if color is not None and not step_by_step:
-                    self.canvas.pri_pix(xi, yi, fill=color, tag=self.tag)
-
-        # if not step_by_step:
-            # self.canvas.update()
+            if pr and r0 is not None and r1 is not None:
+                print('Отрисовка')
+                self.canvas.draw_line(r0, r1, **kwgs)

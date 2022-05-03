@@ -138,7 +138,7 @@ class LabApp(App):
 
         for ind, fig in enumerate(self.position.data):
             text += f'{ind}: state - {"finished" if fig.finished else "not finished"}\n' \
-                    f'{fig.dots[-1] if fig.dots else "..."} - {fig.dots[-1] if fig.finished else "..."}\n\n'
+                    f'{fig.dots[0] if fig.dots else "..."} - {fig.dots[-1] if fig.finished else "..."}\n\n'
 
         return text
 
@@ -222,7 +222,7 @@ class LabApp(App):
 
                 return None
 
-            cutter = Field(a, b)
+            cutter = Field(Vector(min(a.x, b.x), min(a.y, b.y)), Vector(max(a.x, b.x), max(a.y, b.y)))
 
             self.canvas.change_cutter(cutter)
 
