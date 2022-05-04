@@ -113,6 +113,8 @@ class LabApp(App):
         if not only_scene:
             self.text_list.set_text(self._gen_text())
 
+        self.canvas.draw_x(self.init_coordinate)
+
     def _handle_del_with_id_button(self, event=None):
         new_window = MyDelWithIdForm(self)
         id = new_window.handle_open()
@@ -132,6 +134,7 @@ class LabApp(App):
         for ind, figure in enumerate(self.position.data):
             state = 'finished' if figure.finished else 'not finished'
             text += f'id: {ind}, state: {state}\n'
+            text += f'last time: {figure.last_time * 1000 :.3f}\n'
 
             for dot in figure.dots:
                 text += f'  {dot}\n'
@@ -234,6 +237,8 @@ class LabApp(App):
         dot = self._get_vector_from_entries()
 
         self.init_coordinate = dot
+
+        self.set_position()
 
     def _start_make_figure_process(self, event=None):
         if self.position.data:

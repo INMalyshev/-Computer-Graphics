@@ -1,4 +1,5 @@
 from src.ui.my_canvas import MyCanvas
+from src.vector import Vector
 
 
 class MyLabCanvas(MyCanvas):
@@ -18,6 +19,20 @@ class MyLabCanvas(MyCanvas):
     def change_fill_color(self, color):
         if color is not None:
             self.fill_color = color
+
+    def draw_x(self, a):
+        x, y = a.x, a.y
+        kwgs = {
+            'fill': 'red',
+            'tag': 'x',
+            'width': 5,
+        }
+
+        d = 5
+        dx = self.canvasDistance2distance(d)
+
+        self.draw_line(Vector(x-dx, y-dx), Vector(x+dx, x+dx), **kwgs)
+        self.draw_line(Vector(x-dx, y+dx), Vector(x+dx, x-dx), **kwgs)
 
     def set_position(self, data,  **kwargs):
         tag = None if 'tag' not in kwargs else kwargs['tag']

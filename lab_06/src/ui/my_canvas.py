@@ -26,7 +26,6 @@ class MyCanvas(Canvas):
 
         self.bind("<Configure>", lambda event: self.correct_field())
 
-
     def zoom(self, k):
         if k > 0:
             v1 = self.field.start
