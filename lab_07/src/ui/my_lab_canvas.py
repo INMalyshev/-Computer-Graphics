@@ -11,7 +11,7 @@ class MyLabCanvas(MyCanvas):
         self.line_color = parent.line_color
         self.circuit_color = parent.circuit_color
 
-        self.cutter = Field(Vector(-20, -20), Vector(20, 20))
+        self.cutter = None
 
     def change_cutter(self, cutter):
         self.cutter = cutter
