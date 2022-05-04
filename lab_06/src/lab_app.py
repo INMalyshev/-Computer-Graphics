@@ -35,6 +35,8 @@ class LabApp(App):
     def __init__(self):
         super(LabApp, self).__init__()
 
+        self.title('lab_06')
+
         # Параметры
         self.line_width = 2
         self.line_color = 'red'
