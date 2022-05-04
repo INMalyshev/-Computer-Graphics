@@ -55,12 +55,12 @@ class LabApp(App):
         self.slowly_button = MyButton(self, 'Сбросить отсечение', self._handle_rewind_cutter_button)
         self.slowly_button.place(relx=0.8, rely=0.05, relheight=0.05, relwidth=0.2)
 
-        self.fill_mod = IntVar()
-        self.fill_mod.set(0)
-        self.filling_mod = Radiobutton(self, text="duplicated", variable=self.fill_mod, value=0)
-        self.erasing_mod = Radiobutton(self, text="duplicated", variable=self.fill_mod, value=1)
-        self.filling_mod.place(relx=0.8, rely=0.1, relheight=0.05, relwidth=0.1)
-        self.erasing_mod.place(relx=0.9, rely=0.1, relheight=0.05, relwidth=0.1)
+        # self.fill_mod = IntVar()
+        # self.fill_mod.set(0)
+        # self.filling_mod = Radiobutton(self, text="duplicated", variable=self.fill_mod, value=0)
+        # self.erasing_mod = Radiobutton(self, text="duplicated", variable=self.fill_mod, value=1)
+        # self.filling_mod.place(relx=0.8, rely=0.1, relheight=0.05, relwidth=0.1)
+        # self.erasing_mod.place(relx=0.9, rely=0.1, relheight=0.05, relwidth=0.1)
 
         self.del_with_id_button = MyButton(self, 'Удалить по индексу', self._handle_del_with_id_button)
         self.del_with_id_button.place(relx=0.8, rely=0.15, relheight=0.05, relwidth=0.2)
@@ -68,11 +68,11 @@ class LabApp(App):
         self.change_color_button = MyButton(self, 'Изменить цвет линии', self._handle_choose_line_color_button)
         self.change_color_button.place(relx=0.8, rely=0.2, relheight=0.05, relwidth=0.2)
 
-        self.new_figure_button = MyButton(self, 'duplicated', None)
-        self.new_figure_button.place(relx=0.8, rely=0.45, relheight=0.05, relwidth=0.2)
-
-        self.finish_figure_button = MyButton(self, 'duplicated', None)
-        self.finish_figure_button.place(relx=0.8, rely=0.5, relheight=0.05, relwidth=0.2)
+        # self.new_figure_button = MyButton(self, 'duplicated', None)
+        # self.new_figure_button.place(relx=0.8, rely=0.45, relheight=0.05, relwidth=0.2)
+        #
+        # self.finish_figure_button = MyButton(self, 'duplicated', None)
+        # self.finish_figure_button.place(relx=0.8, rely=0.5, relheight=0.05, relwidth=0.2)
 
         self.text_x0 = StringVar()
         self.text_y0 = StringVar()
