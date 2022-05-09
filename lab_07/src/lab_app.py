@@ -57,7 +57,7 @@ class LabApp(App):
         self.slowly_button = MyButton(self, 'Сбросить отсечение', self._handle_rewind_cutter_button)
         self.slowly_button.place(relx=0.8, rely=0.05, relheight=0.05, relwidth=0.2)
 
-        self.slowly_button = MyButton(self, 'Установить отсечение руками', None)
+        self.slowly_button = MyButton(self, 'Установить отсечение руками', self._start_make_cutter_process)
         self.slowly_button.place(relx=0.8, rely=0.1, relheight=0.05, relwidth=0.2)
 
         # self.fill_mod = IntVar()
@@ -383,117 +383,120 @@ class LabApp(App):
         binds.append(self.canvas.bind("<Shift-Button-1>", lambda event: add_perpendicular_dot(self, event)))
         binds.append(self.canvas.bind("<Shift-Motion>", lambda event: create_perpendicular_prompt_line(self, event)))
 
-    def _start_set_cutter_process(self, event=None):
+    def _start_make_cutter_process(self, event=None):
         if self.hand_mod:
             return
 
-        if self.position.data:
-            if not self.position.data[-1].finished:
-                del self.position.data[-1]
-
         self.hand_mod = True
         self.canvas.cutter = None
-        self.
+        self.canvas.cutter_buffer = list()
+
+        self.set_position()
 
         binds = []
         line_width = self.canvas.line_width
 
-        def finish_make_figure_process(self, event=None):
-            # self.unbind("<Return>", binds[0])
+        def finish_make_cutter_process(self, event=None):
+            self.unbind("<Return>", binds[0])
             self.canvas.unbind("<Button-1>", binds[1])
             self.canvas.unbind("<Motion>", binds[2])
             self.canvas.unbind("<Shift-Button-1>", binds[3])
             self.canvas.unbind("<Shift-Motion>", binds[4])
 
             self.hand_mod = False
+            # if len(self.canvas.cutter_buffer) > 2:
+            #     self.canvas.cutter = self.canvas.cutter_buffer.copy()
+            # else:
+            #     self.canvas.cutter = None
+            print(self.canvas.cutter_buffer)
+            a = self.canvas.cutter_buffer[0]
+            b = self.canvas.cutter_buffer[1]
+            cutter = Field(Vector(min(a.x, b.x), min(a.y, b.y)), Vector(max(a.x, b.x), max(a.y, b.y)))
+            self.canvas.change_cutter(cutter)
+            self.canvas.cutter_buffer = None
 
-            tag = self.position.data[-1].tag
-            self.set_position(tag=tag)
+            # tag = self.position.data[-1].tag
+            # self.set_position(tag=tag)
+            self.set_position()
 
         def add_dot(self, event=None):
             on_canvas = Vector(event.x, event.y)
             on_real = self.canvas.canvasCoordinates2vector(on_canvas)
-            self.position.data[-1].dots.append(on_real)
-            tag = self.position.data[-1].tag
-            self.set_position(tag=tag)
-            if len(self.position.data[-1].dots) >= 2:
-                self.position.data[-1].finished = True
-                finish_make_figure_process(self)
+            if on_real not in self.canvas.cutter_buffer and len(self.canvas.cutter_buffer) < 2:
+                self.canvas.cutter_buffer.append(on_real)
+                self.set_position()
 
-        def add_perpendicular_dot(self,  event=None):
-            on_canvas = Vector(event.x, event.y)
-            on_real = self.canvas.canvasCoordinates2vector(on_canvas)
+            if len(self.canvas.cutter_buffer) == 2:
+                finish_make_cutter_process(self)
+            # tag = self.position.data[-1].tag
+            # self.set_position(tag=tag)
+            # self.canvas.draw_cutter()
+            # self.set_position()
 
-            if len(self.position.data[-1].dots) > 0:
-                last_dot = self.position.data[-1].dots[-1]
-                delta = on_real - last_dot
-                if abs(delta.x) >= abs(delta.y):
-                    on_real = last_dot + Vector(delta.x, 0)
-                else:
-                    on_real = last_dot + Vector(0, delta.y)
-
-            self.position.data[-1].dots.append(on_real)
-            tag = self.position.data[-1].tag
-            self.set_position(tag=tag)
-
-            if len(self.position.data[-1].dots) >= 2:
-                self.position.data[-1].finished = True
-                finish_make_figure_process(self)
-
-        def create_prompt_line(self, event):
-            if len(self.position.data[-1].dots) > 0:
-                tag = self.position.data[-1].tag
-                self.set_position(tag=tag)
-
-                on_canvas = Vector(event.x, event.y)
-                on_real = self.canvas.canvasCoordinates2vector(on_canvas)
-                last_dot = self.position.data[-1].dots[-1]
-                self.canvas.draw_line(last_dot, on_real, fill='red', width=line_width, tag=tag)
-
-        def create_perpendicular_prompt_line(self, event):
-            if len(self.position.data[-1].dots) > 0:
-                tag = self.position.data[-1].tag
-                self.set_position(tag=tag)
-
-                on_canvas = Vector(event.x, event.y)
-                on_real = self.canvas.canvasCoordinates2vector(on_canvas)
-                last_dot = self.position.data[-1].dots[-1]
-
-                delta = on_real - last_dot
-                if abs(delta.x) >= abs(delta.y):
-                    on_real = last_dot + Vector(delta.x, 0)
-                else:
-                    on_real = last_dot + Vector(0, delta.y)
-
-                self.canvas.draw_line(last_dot, on_real, fill='red', width=line_width, tag=tag)
-
-        # def finish_make_figure_process(self, event=None):
-        #     # self.unbind("<Return>", binds[0])
-        #     self.canvas.unbind("<Button-1>", binds[1])
-        #     self.canvas.unbind("<Motion>", binds[2])
-        #     self.canvas.unbind("<Shift-Button-1>", binds[3])
-        #     self.canvas.unbind("<Shift-Motion>", binds[4])
+        # def add_perpendicular_dot(self, event=None):
+        #     on_canvas = Vector(event.x, event.y)
+        #     on_real = self.canvas.canvasCoordinates2vector(on_canvas)
         #
-        #     self.hand_mod = False
+        #     if len(self.canvas.cutter_buffer) > 0:
+        #         last_dot = self.canvas.cutter_buffer[-1]
+        #         delta = on_real - last_dot
+        #         if abs(delta.x) >= abs(delta.y):
+        #             on_real = last_dot + Vector(delta.x, 0)
+        #         else:
+        #             on_real = last_dot + Vector(0, delta.y)
         #
+        #     self.canvas.cutter_buffer.append(on_real)
         #     # tag = self.position.data[-1].tag
         #     # self.set_position(tag=tag)
+        #     # self.canvas.draw_cutter()
+        #     self.set_position()
+        #
+        #     # if len(self.position.data[-1].dots) >= 2:
+        #     #     self.position.data[-1].finished = True
+        #     #     finish_make_figure_process(self)
 
-        new_figure = {
-            'finished': False,
-            'tag': 'tag' + str(self.inner_index),
-            'fill': self.canvas.line_color,
-            'type': 'line',
-            'dots': [],
-        }
+        def create_prompt_line(self, event):
+            if len(self.canvas.cutter_buffer) > 0:
+                # tag = self.position.data[-1].tag
+                # self.set_position(tag=tag)
+                self.set_position()
 
-        self._make_record()
-        self.position.data.append(Figure(self.canvas, **new_figure))
-        self.set_position(only_text=True)
+                on_canvas = Vector(event.x, event.y)
+                on_real = self.canvas.canvasCoordinates2vector(on_canvas)
+                last_dot = self.canvas.cutter_buffer[-1]
+                x0, y0, x1, y1 = last_dot.x, last_dot.y, on_real.x, on_real.y
+                # self.canvas.draw_line(last_dot, on_real, fill='red', width=line_width, tag=tag)
+                self.canvas.draw_line(last_dot, Vector(x0, y1), fill='red', width=line_width)
+                self.canvas.draw_line(last_dot, Vector(x1, y0), fill='red', width=line_width)
+                self.canvas.draw_line(on_real, Vector(x0, y1), fill='red', width=line_width)
+                self.canvas.draw_line(on_real, Vector(x1, y0), fill='red', width=line_width)
+
+        # def create_perpendicular_prompt_line(self, event):
+        #     if len(self.position.data[-1].dots) > 0:
+        #         # tag = self.position.data[-1].tag
+        #         # self.set_position(tag=tag)
+        #         self.set_position()
+        #
+        #         on_canvas = Vector(event.x, event.y)
+        #         on_real = self.canvas.canvasCoordinates2vector(on_canvas)
+        #         last_dot = self.canvas.cutter_buffer[-1]
+        #
+        #         delta = on_real - last_dot
+        #         if abs(delta.x) >= abs(delta.y):
+        #             on_real = last_dot + Vector(delta.x, 0)
+        #         else:
+        #             on_real = last_dot + Vector(0, delta.y)
+        #
+        #         # self.canvas.draw_line(last_dot, on_real, fill='red', width=line_width, tag=tag)
+        #         self.canvas.draw_line(last_dot, on_real, fill='red', width=line_width)
+
+        # self._make_record()
+        # self.position.data.append(Figure(self.canvas, **new_figure))
+        # self.set_position(only_text=True)
 
         binds.append(self.bind("<Return>", None))
         binds.append(self.canvas.bind("<Button-1>", lambda event: add_dot(self, event)))
         binds.append(self.canvas.bind("<Motion>", lambda event: create_prompt_line(self, event)))
-        binds.append(self.canvas.bind("<Shift-Button-1>", lambda event: add_perpendicular_dot(self, event)))
-        binds.append(self.canvas.bind("<Shift-Motion>", lambda event: create_perpendicular_prompt_line(self, event)))
+        binds.append(self.canvas.bind("<Shift-Button-1>", None))
+        binds.append(self.canvas.bind("<Shift-Motion>", None))
 
