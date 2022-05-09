@@ -54,7 +54,7 @@ class LabApp(App):
         self.process_button = MyButton(self, 'Задать отрезок руками', self._start_make_figure_process)
         self.process_button.place(relx=0.8, rely=0, relheight=0.05, relwidth=0.2)
 
-        self.set_cutter_with_hands_button = MyButton(self, 'change cutter with hands', self._start_make_cutter_process)
+        self.set_cutter_with_hands_button = MyButton(self, 'Задать отсекатель руками', self._start_make_cutter_process)
         self.set_cutter_with_hands_button.place(relx=0.8, rely=0.05, relheight=0.05, relwidth=0.2)
 
         self.slowly_button = MyButton(self, 'Сбросить отсечение', self._handle_rewind_cutter_button)
@@ -81,29 +81,32 @@ class LabApp(App):
 
         self.text_x0 = StringVar()
         self.text_y0 = StringVar()
-        self.text_x1 = StringVar()
-        self.text_y1 = StringVar()
+        # self.text_x1 = StringVar()
+        # self.text_y1 = StringVar()
 
-        Label(self, text='x0:').place(relx=0.8, rely=0.55, relheight=0.05, relwidth=0.05)
+        Label(self, text='x:').place(relx=0.8, rely=0.55, relheight=0.05, relwidth=0.05)
         self.x0_entry = Entry(self, textvariable=self.text_x0)
         self.x0_entry.place(relx=0.85, rely=0.55, relheight=0.05, relwidth=0.15)
 
-        Label(self, text='y0:').place(relx=0.8, rely=0.6, relheight=0.05, relwidth=0.05)
+        Label(self, text='y:').place(relx=0.8, rely=0.6, relheight=0.05, relwidth=0.05)
         self.y0_entry = Entry(self, textvariable=self.text_y0)
         self.y0_entry.place(relx=0.85, rely=0.6, relheight=0.05, relwidth=0.15)
 
-        Label(self, text='x1:').place(relx=0.8, rely=0.65, relheight=0.05, relwidth=0.05)
-        self.x1_entry = Entry(self, textvariable=self.text_x1)
-        self.x1_entry.place(relx=0.85, rely=0.65, relheight=0.05, relwidth=0.15)
+        # Label(self, text='x1:').place(relx=0.8, rely=0.65, relheight=0.05, relwidth=0.05)
+        # self.x1_entry = Entry(self, textvariable=self.text_x1)
+        # self.x1_entry.place(relx=0.85, rely=0.65, relheight=0.05, relwidth=0.15)
+        #
+        # Label(self, text='y1:').place(relx=0.8, rely=0.7, relheight=0.05, relwidth=0.05)
+        # self.y1_entry = Entry(self, textvariable=self.text_y1)
+        # self.y1_entry.place(relx=0.85, rely=0.7, relheight=0.05, relwidth=0.15)
 
-        Label(self, text='y1:').place(relx=0.8, rely=0.7, relheight=0.05, relwidth=0.05)
-        self.y1_entry = Entry(self, textvariable=self.text_y1)
-        self.y1_entry.place(relx=0.85, rely=0.7, relheight=0.05, relwidth=0.15)
+        self.add_cutter_dot_button = MyButton(self, 'Добавить точку отсечения', self._handle_set_cutter_button)
+        self.add_cutter_dot_button.place(relx=0.8, rely=0.65, relheight=0.05, relwidth=0.2)
 
-        self.add_dot_button = MyButton(self, 'Установить отсечение', self._handle_set_cutter_button)
-        self.add_dot_button.place(relx=0.8, rely=0.75, relheight=0.05, relwidth=0.2)
+        self.finish_cutter_button = MyButton(self, 'Замкнуть отсекатель', self._handle_finish_cutter_button)
+        self.finish_cutter_button.place(relx=0.8, rely=0.7, relheight=0.05, relwidth=0.2)
 
-        self.change_center_button = MyButton(self, 'Добавить отрезок', self._handle_add_line_button)
+        self.change_center_button = MyButton(self, 'Добавить точку отрезка', self._handle_add_line_button)
         self.change_center_button.place(relx=0.8, rely=0.8, relheight=0.05, relwidth=0.2)
 
         # Text
@@ -165,18 +168,19 @@ class LabApp(App):
 
         return text
 
-    def _get_two_vectors_from_entries(self):
+    def _get_vector_from_entries(self):
         str_x0 = self.text_x0.get()
         str_y0 = self.text_y0.get()
-        str_x1 = self.text_x1.get()
-        str_y1 = self.text_y1.get()
+        # str_x1 = self.text_x1.get()
+        # str_y1 = self.text_y1.get()
 
         self.text_x0.set('')
         self.text_y0.set('')
-        self.text_x1.set('')
-        self.text_y1.set('')
+        # self.text_x1.set('')
+        # self.text_y1.set('')
 
-        x0, y0, x1, y1 = None, None, None, None
+        # x0, y0, x1, y1 = None, None, None, None
+        x0, y0 = None, None
 
         try:
             x0 = float(str_x0)
@@ -197,25 +201,25 @@ class LabApp(App):
 
         a = Vector(x0, y0)
 
-        try:
-            x1 = float(str_x1)
-        except Exception:
-            if len(str_x1) > 0:
-                showerror('x1 error', 'x1 not a float number')
+        # try:
+        #     x1 = float(str_x1)
+        # except Exception:
+        #     if len(str_x1) > 0:
+        #         showerror('x1 error', 'x1 not a float number')
+        #
+        #     return None
+        #
+        # try:
+        #     y1 = float(str_y1)
+        # except Exception:
+        #     if len(str_y1) > 0:
+        #         showerror('y1 error', 'y1 not a float number')
+        #
+        #     return None
+        #
+        # b = Vector(x1, y1)
 
-            return None
-
-        try:
-            y1 = float(str_y1)
-        except Exception:
-            if len(str_y1) > 0:
-                showerror('y1 error', 'y1 not a float number')
-
-            return None
-
-        b = Vector(x1, y1)
-
-        return a, b
+        return a
 
     def _rewind(self, event=None):
         if self.hand_mod:
@@ -240,51 +244,76 @@ class LabApp(App):
         if self.hand_mod:
             return
 
-        answer = self._get_two_vectors_from_entries()
+        a = self._get_vector_from_entries()
 
-        if answer is not None:
-            a, b = answer
-
+        if a is not None:
             if not self.canvas.field.include(a):
                 showerror('cutter error', f'{a} not in {self.canvas.field.start} : {self.canvas.field.finish}')
 
                 return None
 
-            if not self.canvas.field.include(b):
-                showerror('cutter error', f'{b} not in {self.canvas.field.start} : {self.canvas.field.finish}')
+            # if not self.canvas.field.include(b):
+            #     showerror('cutter error', f'{b} not in {self.canvas.field.start} : {self.canvas.field.finish}')
+            #
+            #     return None
 
-                return None
+            if self.canvas.cutter is not None:
+                self.canvas.cutter = None
+                self.canvas.cutter_buffer = [a]
+            elif self.canvas.cutter_buffer is not None:
+                self.canvas.cutter_buffer.append(a)
+            else:
+                self.canvas.cutter_buffer = [a]
 
-            cutter = [
-                Vector(min(a.x, b.x), min(a.y, b.y)),
-                Vector(min(a.x, b.x), max(a.y, b.y)),
-                Vector(max(a.x, b.x), max(a.y, b.y)),
-                Vector(max(a.x, b.x), min(a.y, b.y)),
-            ]
-
-            self.canvas.change_cutter(cutter)
+            # self.canvas.change_cutter(cutter)
 
             self.set_position()
+
+    def _handle_finish_cutter_button(self, event=None):
+        if self.hand_mod:
+            return
+
+        if self.canvas.cutter is not None:
+            return
+
+        if len(self.canvas.cutter_buffer) > 2:
+            self.canvas.cutter = self.canvas.cutter_buffer.copy()
+
+        self.canvas.cutter_buffer = None
+
+        self.set_position()
 
     def _handle_add_line_button(self, event=None):
         if self.hand_mod:
             return
 
-        answer = self._get_two_vectors_from_entries()
+        a = self._get_vector_from_entries()
 
-        if answer is not None:
-            a, b = answer
-
-            new_figure = {
-                    'finished': True,
-                    'tag': 'tag' + str(self.inner_index),
-                    'fill': self.canvas.line_color,
-                    'type': 'line',
-                    'dots': [a, b],
-                }
-
-            self._make_record()
-            self.position.data.append(Figure(self.canvas, **new_figure))
+        if a is not None:
+            if len(self.position.data) > 0:
+                if self.position.data[-1].finished:
+                    new_figure = {
+                            'finished': False,
+                            'tag': 'tag' + str(self.inner_index),
+                            'fill': self.canvas.line_color,
+                            'type': 'line',
+                            'dots': [a],
+                        }
+                    self._make_record()
+                    self.position.data.append(Figure(self.canvas, **new_figure))
+                else:
+                    self.position.data[-1].dots.append(a)
+                    self.position.data[-1].finished = True
+            else:
+                new_figure = {
+                        'finished': False,
+                        'tag': 'tag' + str(self.inner_index),
+                        'fill': self.canvas.line_color,
+                        'type': 'line',
+                        'dots': [a],
+                    }
+                self._make_record()
+                self.position.data.append(Figure(self.canvas, **new_figure))
             self.set_position()
 
     def _handle_choose_line_color_button(self, event=None):
