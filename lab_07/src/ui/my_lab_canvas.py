@@ -12,6 +12,7 @@ class MyLabCanvas(MyCanvas):
         self.circuit_color = parent.circuit_color
 
         self.cutter = None
+        self.cutter_buffer = None
 
     def change_cutter(self, cutter):
         self.cutter = cutter
