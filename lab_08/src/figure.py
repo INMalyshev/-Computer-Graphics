@@ -95,8 +95,6 @@ class Figure:
 
                 self.canvas.draw_line(a, b, **kwgs)
 
-
-
     def lines_with_cutter(self, **kwargs):
         if self.finished:
             eps = 1e-6
