@@ -100,4 +100,3 @@ class Vector:
         normal = self.get_normal()
 
         return normal.get_orthogonal()
-

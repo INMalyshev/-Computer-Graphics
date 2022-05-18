@@ -36,7 +36,7 @@ class LabApp(App):
     def __init__(self):
         super(LabApp, self).__init__()
 
-        self.title('lab_07')
+        self.title('lab_08')
 
         # Параметры
         self.line_width = 3
@@ -269,6 +269,29 @@ class LabApp(App):
 
             self.set_position()
 
+    def _check_cutter_buffer(self):
+        cutter = self.canvas.cutter_buffer
+
+        PosAngle = False
+        NegAngle = False
+        for i in range(len(cutter)):
+            x1 = cutter[i].x
+            y1 = cutter[i].y
+            x2 = cutter[(i + 1) % len(cutter)].x
+            y2 = cutter[(i + 1) % len(cutter)].y
+            x3 = cutter[(i + 2) % len(cutter)].x
+            y3 = cutter[(i + 2) % len(cutter)].y
+            d = (x2 - x1) * (y3 - y2) - (y2 - y1) * (x3 - x2)
+            if d > 0:
+                PosAngle = True
+            elif d < 0:
+                NegAngle = True
+
+        if PosAngle and NegAngle:
+            return False
+        else:
+            return True
+
     def _handle_finish_cutter_button(self, event=None):
         if self.hand_mod:
             return
@@ -277,7 +300,10 @@ class LabApp(App):
             return
 
         if len(self.canvas.cutter_buffer) > 2:
-            self.canvas.cutter = self.canvas.cutter_buffer.copy()
+            if self._check_cutter_buffer():
+                self.canvas.cutter = self.canvas.cutter_buffer.copy()
+            else:
+                showerror('Ошибка', 'Отсекатель должен быть представлен выпуклым многоугольником')
 
         self.canvas.cutter_buffer = None
 
@@ -446,7 +472,10 @@ class LabApp(App):
 
             self.hand_mod = False
             if len(self.canvas.cutter_buffer) > 2:
-                self.canvas.cutter = self.canvas.cutter_buffer.copy()
+                if self._check_cutter_buffer():
+                    self.canvas.cutter = self.canvas.cutter_buffer.copy()
+                else:
+                    showerror('Ошибка', 'Отсекатель должен быть представлен выпуклым многоугольником')
             else:
                 self.canvas.cutter = None
 
@@ -501,7 +530,7 @@ class LabApp(App):
                 self.canvas.draw_line(last_dot, on_real, fill='red', width=line_width)
 
         def create_perpendicular_prompt_line(self, event):
-            if len(self.position.data[-1].dots) > 0:
+            if len(self.canvas.cutter_buffer) > 0:
                 # tag = self.position.data[-1].tag
                 # self.set_position(tag=tag)
                 self.set_position()
